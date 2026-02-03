@@ -321,48 +321,52 @@
 			name = Release;
 		};
 
-		1F73283F93344B2680576002  = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "pixia-chat/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = euorg.pixiachat.pixia;
-				PRODUCT_NAME = PixiaChat;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+			1F73283F93344B2680576002  = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = NO;
+					INFOPLIST_FILE = "pixia-chat/Info.plist";
+					IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+					MARKETING_VERSION = 1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = euorg.pixiachat.pixia;
+					PRODUCT_NAME = PixiaChat;
+					SDKROOT = iphoneos;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Debug;
 			};
-			name = Debug;
-		};
 
-		DAA09C0CA4854F1E81662362  = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "pixia-chat/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = euorg.pixiachat.pixia;
-				PRODUCT_NAME = PixiaChat;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+			DAA09C0CA4854F1E81662362  = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = NO;
+					INFOPLIST_FILE = "pixia-chat/Info.plist";
+					IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+					MARKETING_VERSION = 1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = euorg.pixiachat.pixia;
+					PRODUCT_NAME = PixiaChat;
+					SDKROOT = iphoneos;
+					SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+					SWIFT_VERSION = 5.0;
+					TARGETED_DEVICE_FAMILY = "1,2";
+				};
+				name = Release;
 			};
-			name = Release;
-		};
 
 
 
