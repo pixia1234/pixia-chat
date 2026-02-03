@@ -36,6 +36,7 @@ final class ChatViewModel: ObservableObject {
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
 
         let messages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
+        let requestMessages = [ChatMessage(role: ChatRole.system, content: "you are a helpful assistant")] + messages
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"
@@ -69,7 +70,7 @@ final class ChatViewModel: ObservableObject {
             streamTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    for try await token in client.stream(messages: messages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
+                    for try await token in client.stream(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
                         if Task.isCancelled { break }
                         self.assistantDraft += token
                     }
@@ -86,7 +87,7 @@ final class ChatViewModel: ObservableObject {
             Task { [weak self] in
                 guard let self else { return }
                 do {
-                    let text = try await client.send(messages: messages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
+                    let text = try await client.send(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
                     if self.isSessionValid(session) {
                         store.addMessage(to: session, role: ChatRole.assistant, content: text)
                     }
