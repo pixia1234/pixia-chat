@@ -28,6 +28,7 @@
 		B975F4D8ED03499991EEF3A7  = {isa = PBXBuildFile; fileRef = 862F24C7DAD54E96B72770C3 ; };
 		2E7F21FAC7094896B4D7A9B5  = {isa = PBXBuildFile; fileRef = AD70D96F01F3435B8BE0B54E ; };
 		6A86A701FF6E4F78A62EA111  = {isa = PBXBuildFile; fileRef = 5D2F8A6C20974D63A6D7D222 ; };
+		7C3B7E1B1F1B4E9D9E6A4C44  = {isa = PBXBuildFile; fileRef = 4F3B8A9A0A2A4D2F9D6D8B22 ; };
 		2CFB7E2F7C1F401FBF1E3AAA  = {isa = PBXBuildFile; fileRef = 6D93B1CDA1A94616A1C9B444 ; };
 		289E2F4DB4804C1D85770BE5  = {isa = PBXBuildFile; fileRef = 420FBA8B4AB94D939EAD0A5B ; };
 		A7B4BA5EC541405C82D86552  = {isa = PBXBuildFile; fileRef = 04B864E7BE8749C1AA44AB92 ; };
@@ -54,6 +55,7 @@
 		3339086E469A41AE8971DFE8  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
 		C1B7D18AB4E64DF7B7B7A111  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSplitView.swift; sourceTree = "<group>"; };
 		D2C8E29AC5F7428FA6A6B222  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingIndicatorView.swift; sourceTree = "<group>"; };
+		4F3B8A9A0A2A4D2F9D6D8B22  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSplitView.swift; sourceTree = "<group>"; };
 
 		FE70FCC9B189450E93CB088A  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		D8DACDA344AE4A6EA3E14223  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -193,6 +195,7 @@
 				3339086E469A41AE8971DFE8 ,
 				C1B7D18AB4E64DF7B7B7A111 ,
 				D2C8E29AC5F7428FA6A6B222 ,
+				4F3B8A9A0A2A4D2F9D6D8B22 ,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 				143494019139403E9F6F2EE6 ,
 				E3D9F30BD6A7439BA5C5C333 ,
 				F4EA041CE7B24A8C94D4D444 ,
+				7C3B7E1B1F1B4E9D9E6A4C44 ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

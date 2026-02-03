@@ -19,8 +19,14 @@ struct RootView: View {
                 Label("对话", systemImage: "message")
             }
 
-            NavigationView {
-                SettingsView(viewModel: SettingsViewModel(store: settings))
+            Group {
+                if horizontalSizeClass == .regular {
+                    SettingsSplitView()
+                } else {
+                    NavigationView {
+                        SettingsView(viewModel: SettingsViewModel(store: settings))
+                    }
+                }
             }
             .tabItem {
                 Label("设置", systemImage: "gear")

@@ -14,6 +14,11 @@ final class ChatViewModel: ObservableObject {
     private var streamTask: Task<Void, Never>?
     private var requestToken: Int = 0
     private var responseStartTime: Date?
+    private var pendingCharacters: [Character] = []
+    private var typingTask: Task<Void, Never>?
+    private var streamDidEnd: Bool = false
+    private var pendingFinishSession: ChatSession?
+    private var pendingFinishToken: Int = 0
 
     init(context: NSManagedObjectContext, settings: SettingsStore) {
         self.context = context
@@ -33,16 +38,13 @@ final class ChatViewModel: ObservableObject {
         DebugLogger.log("send start session=\(session.objectID.uriRepresentation().absoluteString) token=\(token) stream=\(settings.stream)")
 
         let store = ChatStore(context: context)
+        let systemPrompt = settings.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        if session.messagesArray.first?.role != ChatRole.system, !systemPrompt.isEmpty {
+            store.addMessage(to: session, role: ChatRole.system, content: systemPrompt)
+        }
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
 
-        let messages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
-        let systemPrompt = settings.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        let requestMessages: [ChatMessage]
-        if systemPrompt.isEmpty {
-            requestMessages = messages
-        } else {
-            requestMessages = [ChatMessage(role: ChatRole.system, content: systemPrompt)] + messages
-        }
+        let requestMessages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"
@@ -72,13 +74,16 @@ final class ChatViewModel: ObservableObject {
         if settings.stream {
             assistantDraft = ""
             isStreaming = true
+            streamDidEnd = false
+            pendingFinishSession = nil
+            pendingCharacters.removeAll()
             streamTask?.cancel()
             streamTask = Task { [weak self] in
                 guard let self else { return }
                 do {
                     for try await token in client.stream(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
                         if Task.isCancelled { break }
-                        self.assistantDraft += token
+                        self.enqueueTyping(token)
                     }
                     self.finishStreaming(session: session, token: token)
                 } catch {
@@ -94,14 +99,17 @@ final class ChatViewModel: ObservableObject {
                 guard let self else { return }
                 do {
                     let text = try await client.send(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
+                    var simulated = false
                     if self.isSessionValid(session) {
-                        store.addMessage(to: session, role: ChatRole.assistant, content: text)
+                        simulated = self.startSimulatedTyping(text: text, session: session, token: token)
                     }
                 } catch {
                     DebugLogger.log("send error: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                 }
-                self.endAwaiting(token: token)
+                if !self.isStreaming {
+                    self.endAwaiting(token: token)
+                }
             }
         }
     }
@@ -118,10 +126,25 @@ final class ChatViewModel: ObservableObject {
         isStreaming = false
         isAwaitingResponse = false
         streamTask = nil
+        pendingCharacters.removeAll()
+        typingTask?.cancel()
+        typingTask = nil
+        streamDidEnd = false
+        pendingFinishSession = nil
     }
 
     private func finishStreaming(session: ChatSession, token: Int) {
-        guard isStreaming || !assistantDraft.isEmpty else { return }
+        guard isStreaming || !assistantDraft.isEmpty || !pendingCharacters.isEmpty else { return }
+        streamDidEnd = true
+        pendingFinishSession = session
+        pendingFinishToken = token
+        if typingTask != nil || !pendingCharacters.isEmpty {
+            return
+        }
+        finalizeStreaming(session: session, token: token)
+    }
+
+    private func finalizeStreaming(session: ChatSession, token: Int) {
         let draft = assistantDraft
         assistantDraft = ""
         isStreaming = false
@@ -162,5 +185,43 @@ final class ChatViewModel: ObservableObject {
         }
         isAwaitingResponse = false
         responseStartTime = nil
+    }
+
+    private func enqueueTyping(_ text: String) {
+        guard !text.isEmpty else { return }
+        pendingCharacters.append(contentsOf: text)
+        if typingTask == nil {
+            startTypingTask()
+        }
+    }
+
+    private func startTypingTask() {
+        typingTask = Task { [weak self] in
+            guard let self else { return }
+            while !self.pendingCharacters.isEmpty {
+                let ch = self.pendingCharacters.removeFirst()
+                self.assistantDraft.append(ch)
+                try? await Task.sleep(nanoseconds: 18_000_000)
+            }
+            self.typingTask = nil
+            if self.streamDidEnd, let session = self.pendingFinishSession {
+                let token = self.pendingFinishToken
+                self.pendingFinishSession = nil
+                self.streamDidEnd = false
+                self.finalizeStreaming(session: session, token: token)
+            }
+        }
+    }
+
+    private func startSimulatedTyping(text: String, session: ChatSession, token: Int) -> Bool {
+        guard !text.isEmpty else { return false }
+        assistantDraft = ""
+        isStreaming = true
+        streamDidEnd = true
+        pendingFinishSession = session
+        pendingFinishToken = token
+        pendingCharacters.removeAll()
+        enqueueTyping(text)
+        return true
     }
 }
