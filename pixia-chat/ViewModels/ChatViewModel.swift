@@ -51,13 +51,7 @@ final class ChatViewModel: ObservableObject {
             return
         }
 
-        let client: LLMClient
-        switch settings.apiMode {
-        case .chatCompletions:
-            client = OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
-        case .responses:
-            client = OpenAIResponsesClient(baseURL: url, apiKey: apiKey)
-        }
+        let client = makeClient(mode: settings.apiMode, url: url, apiKey: apiKey)
 
         let maxTokens = settings.maxTokens > 0 ? settings.maxTokens : nil
         let temperature = settings.temperature
@@ -76,10 +70,15 @@ final class ChatViewModel: ObservableObject {
                     self.finishStreaming(session: session, token: token)
                 } catch {
                     DebugLogger.log("stream error: \(error.localizedDescription)")
-                    self.errorMessage = error.localizedDescription
-                    self.isStreaming = false
-                    self.endAwaiting(token: token)
-                    self.streamTask = nil
+                    if settings.apiMode == .responses, self.shouldFallbackToChatCompletions(error.localizedDescription) {
+                        DebugLogger.log("fallback to chat completions (stream)")
+                        self.startFallbackStreaming(messages: messages, session: session, url: url, apiKey: apiKey, temperature: temperature, maxTokens: maxTokens, token: token)
+                    } else {
+                        self.errorMessage = error.localizedDescription
+                        self.isStreaming = false
+                        self.endAwaiting(token: token)
+                        self.streamTask = nil
+                    }
                 }
             }
         } else {
@@ -92,7 +91,20 @@ final class ChatViewModel: ObservableObject {
                     }
                 } catch {
                     DebugLogger.log("send error: \(error.localizedDescription)")
-                    self.errorMessage = error.localizedDescription
+                    if settings.apiMode == .responses, self.shouldFallbackToChatCompletions(error.localizedDescription) {
+                        DebugLogger.log("fallback to chat completions (send)")
+                        do {
+                            let fallbackClient = OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+                            let text = try await fallbackClient.send(messages: messages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
+                            if self.isSessionValid(session) {
+                                store.addMessage(to: session, role: ChatRole.assistant, content: text)
+                            }
+                        } catch {
+                            self.errorMessage = error.localizedDescription
+                        }
+                    } else {
+                        self.errorMessage = error.localizedDescription
+                    }
                 }
                 self.endAwaiting(token: token)
             }
@@ -133,6 +145,42 @@ final class ChatViewModel: ObservableObject {
             DebugLogger.log("session invalid id=\(session.objectID.uriRepresentation().absoluteString) deleted=\(session.isDeleted)")
         }
         return valid
+    }
+
+    private func makeClient(mode: APIMode, url: URL, apiKey: String) -> LLMClient {
+        switch mode {
+        case .chatCompletions:
+            return OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+        case .responses:
+            return OpenAIResponsesClient(baseURL: url, apiKey: apiKey)
+        }
+    }
+
+    private func shouldFallbackToChatCompletions(_ message: String) -> Bool {
+        let lowercased = message.lowercased()
+        return lowercased.contains("input_text") || lowercased.contains("output_text") || lowercased.contains("refusal")
+    }
+
+    private func startFallbackStreaming(messages: [ChatMessage], session: ChatSession, url: URL, apiKey: String, temperature: Double, maxTokens: Int?, token: Int) {
+        assistantDraft = ""
+        isStreaming = true
+        streamTask?.cancel()
+        let fallbackClient = OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+        streamTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                for try await tokenValue in fallbackClient.stream(messages: messages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
+                    if Task.isCancelled { break }
+                    self.assistantDraft += tokenValue
+                }
+                self.finishStreaming(session: session, token: token)
+            } catch {
+                self.errorMessage = error.localizedDescription
+                self.isStreaming = false
+                self.endAwaiting(token: token)
+                self.streamTask = nil
+            }
+        }
     }
 
     private func endAwaiting(token: Int) {
