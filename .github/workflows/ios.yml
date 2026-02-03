@@ -33,21 +33,9 @@ jobs:
 
       - name: Ensure Core Data current version
         run: |
-          python3 - <<'PY'
-          import plistlib
-          import pathlib
-          import sys
-
-          model_dir = pathlib.Path("pixia-chat/PixiaChat.xcdatamodeld")
-          if not model_dir.is_dir():
-              print(f"Missing {model_dir}")
-              sys.exit(1)
-
-          data = {"_XCCurrentVersionName": "PixiaChat.xcdatamodel"}
-          (model_dir / ".xccurrentversion").write_bytes(
-              plistlib.dumps(data, fmt=plistlib.FMT_BINARY)
-          )
-          PY
+          python3 -c 'import plistlib, pathlib, sys; d=pathlib.Path("pixia-chat/PixiaChat.xcdatamodeld"); \
+          (d.is_dir() or (print(f"Missing {d}"), sys.exit(1))); \
+          (d/".xccurrentversion").write_bytes(plistlib.dumps({"_XCCurrentVersionName":"PixiaChat.xcdatamodel"}, fmt=plistlib.FMT_BINARY))'
 
       - name: Build (Simulator)
         run: |
