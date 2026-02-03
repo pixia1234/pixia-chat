@@ -6,204 +6,204 @@
 	objectVersion = 56;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		9ED3B04C83674EB984281DBC /* PixiaChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9085A8821D714A7CA0BC5FD4 /* PixiaChatApp.swift */; };
-		BCF4090E3F56401B947B9B9C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9E2B0AB01247418A49D7EA /* RootView.swift */; };
-		93951AC8659A45D380A39DB9 /* ChatListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9788E768F54E4D5C8E06E509 /* ChatListView.swift */; };
-		BC7789C8734748C8B6738763 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE052899F08A49699493A588 /* ChatView.swift */; };
-		C728FB52375040798F4C515D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8788F0BDDE4E437DA035B3F7 /* SettingsView.swift */; };
-		71249ED6F9DD4B3A98F3C72B /* ChatBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3339086E469A41AE8971DFE8 /* ChatBubbleView.swift */; };
-		C219CEC0488D45DBB0794E8D /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE70FCC9B189450E93CB088A /* ChatMessage.swift */; };
-		E8A188E636894EB18ACCB8AC /* ChatSession+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DACDA344AE4A6EA3E14223 /* ChatSession+CoreDataClass.swift */; };
-		07A4891B35EB4C55882E12FA /* ChatSession+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77953CDE5AB0403089AF662E /* ChatSession+CoreDataProperties.swift */; };
-		CEFAEC2C75A54F3797EB6539 /* Message+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0027FD175E874368B0CFFAB2 /* Message+CoreDataClass.swift */; };
-		ABDFDAE9B6174D5BA8D75A2F /* Message+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C1252FA3794DF4A0A33A00 /* Message+CoreDataProperties.swift */; };
-		088B8CE2843943668261DA14 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B13B0496A5B4CEAAE414968 /* PersistenceController.swift */; };
-		B632ED66DC694FAB98122CF0 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CE572357FB414DB26A27C6 /* ChatStore.swift */; };
-		F8899BD277D44ED88B05F86E /* LLMClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5CD8674373461C8D1B9B71 /* LLMClient.swift */; };
-		B49FCBC83AC44C608CF2DC9D /* OpenAIChatCompletionsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A6A2C2B6FF40DE9F02D992 /* OpenAIChatCompletionsClient.swift */; };
-		E54D7191DB424F3DACCDAA33 /* OpenAIResponsesClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B9EDE0EF024853A9455D2D /* OpenAIResponsesClient.swift */; };
-		909611446278464D846CC00B /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 307822B0F57F462D9D48A7B2 /* SSEParser.swift */; };
-		B975F4D8ED03499991EEF3A7 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 862F24C7DAD54E96B72770C3 /* KeychainService.swift */; };
-		2E7F21FAC7094896B4D7A9B5 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD70D96F01F3435B8BE0B54E /* SettingsStore.swift */; };
-		289E2F4DB4804C1D85770BE5 /* ChatListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420FBA8B4AB94D939EAD0A5B /* ChatListViewModel.swift */; };
-		A7B4BA5EC541405C82D86552 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B864E7BE8749C1AA44AB92 /* ChatViewModel.swift */; };
-		143494019139403E9F6F2EE6 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C69949917F42C99FDD8CB3 /* SettingsViewModel.swift */; };
 
-		72E05804EE264D71B61E615A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 /* Assets.xcassets */; };
-		B93C4018C1F646F2BF946836 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC /* LaunchScreen.storyboard */; };
-		7CA1A2927F584DA2A0F2F91D /* PixiaChat.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 661A4F6D45F64D2CB8953E86 /* PixiaChat.xcdatamodeld */; };
-/* End PBXBuildFile section */
+		9ED3B04C83674EB984281DBC  = {isa = PBXBuildFile; fileRef = 9085A8821D714A7CA0BC5FD4 ; };
+		BCF4090E3F56401B947B9B9C  = {isa = PBXBuildFile; fileRef = ED9E2B0AB01247418A49D7EA ; };
+		93951AC8659A45D380A39DB9  = {isa = PBXBuildFile; fileRef = 9788E768F54E4D5C8E06E509 ; };
+		BC7789C8734748C8B6738763  = {isa = PBXBuildFile; fileRef = BE052899F08A49699493A588 ; };
+		C728FB52375040798F4C515D  = {isa = PBXBuildFile; fileRef = 8788F0BDDE4E437DA035B3F7 ; };
+		71249ED6F9DD4B3A98F3C72B  = {isa = PBXBuildFile; fileRef = 3339086E469A41AE8971DFE8 ; };
+		C219CEC0488D45DBB0794E8D  = {isa = PBXBuildFile; fileRef = FE70FCC9B189450E93CB088A ; };
+		E8A188E636894EB18ACCB8AC  = {isa = PBXBuildFile; fileRef = D8DACDA344AE4A6EA3E14223 ; };
+		07A4891B35EB4C55882E12FA  = {isa = PBXBuildFile; fileRef = 77953CDE5AB0403089AF662E ; };
+		CEFAEC2C75A54F3797EB6539  = {isa = PBXBuildFile; fileRef = 0027FD175E874368B0CFFAB2 ; };
+		ABDFDAE9B6174D5BA8D75A2F  = {isa = PBXBuildFile; fileRef = 05C1252FA3794DF4A0A33A00 ; };
+		088B8CE2843943668261DA14  = {isa = PBXBuildFile; fileRef = 1B13B0496A5B4CEAAE414968 ; };
+		B632ED66DC694FAB98122CF0  = {isa = PBXBuildFile; fileRef = 31CE572357FB414DB26A27C6 ; };
+		F8899BD277D44ED88B05F86E  = {isa = PBXBuildFile; fileRef = AC5CD8674373461C8D1B9B71 ; };
+		B49FCBC83AC44C608CF2DC9D  = {isa = PBXBuildFile; fileRef = 63A6A2C2B6FF40DE9F02D992 ; };
+		E54D7191DB424F3DACCDAA33  = {isa = PBXBuildFile; fileRef = 82B9EDE0EF024853A9455D2D ; };
+		909611446278464D846CC00B  = {isa = PBXBuildFile; fileRef = 307822B0F57F462D9D48A7B2 ; };
+		B975F4D8ED03499991EEF3A7  = {isa = PBXBuildFile; fileRef = 862F24C7DAD54E96B72770C3 ; };
+		2E7F21FAC7094896B4D7A9B5  = {isa = PBXBuildFile; fileRef = AD70D96F01F3435B8BE0B54E ; };
+		289E2F4DB4804C1D85770BE5  = {isa = PBXBuildFile; fileRef = 420FBA8B4AB94D939EAD0A5B ; };
+		A7B4BA5EC541405C82D86552  = {isa = PBXBuildFile; fileRef = 04B864E7BE8749C1AA44AB92 ; };
+		143494019139403E9F6F2EE6  = {isa = PBXBuildFile; fileRef = A0C69949917F42C99FDD8CB3 ; };
 
-/* Begin PBXFileReference section */
-		49E038529E774D348F9DE9E5 /* PixiaChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = PixiaChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E029B7A66619443C97B80FA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CE7C48B47F3247C18CCF36EC /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		94BB5FE08CE24CB3BC1D61D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
+		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
+		7CA1A2927F584DA2A0F2F91D  = {isa = PBXBuildFile; fileRef = 661A4F6D45F64D2CB8953E86 ; };
 
-		07CE0A551DC343A298DB7FE9 /* PixiaChat.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PixiaChat.xcdatamodel; sourceTree = "<group>"; };
 
-		9085A8821D714A7CA0BC5FD4 /* PixiaChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixiaChatApp.swift; sourceTree = "<group>"; };
-		ED9E2B0AB01247418A49D7EA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		9788E768F54E4D5C8E06E509 /* ChatListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListView.swift; sourceTree = "<group>"; };
-		BE052899F08A49699493A588 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
-		8788F0BDDE4E437DA035B3F7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		3339086E469A41AE8971DFE8 /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
 
-		FE70FCC9B189450E93CB088A /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
-		D8DACDA344AE4A6EA3E14223 /* ChatSession+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
-		77953CDE5AB0403089AF662E /* ChatSession+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		0027FD175E874368B0CFFAB2 /* Message+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataClass.swift"; sourceTree = "<group>"; };
-		05C1252FA3794DF4A0A33A00 /* Message+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		49E038529E774D348F9DE9E5  = {isa = PBXFileReference; explicitFileType = wrapper.application; path = PixiaChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E029B7A66619443C97B80FA7  = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CE7C48B47F3247C18CCF36EC  = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		94BB5FE08CE24CB3BC1D61D8  = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 
-		1B13B0496A5B4CEAAE414968 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
-		31CE572357FB414DB26A27C6 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+		07CE0A551DC343A298DB7FE9  = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PixiaChat.xcdatamodel; sourceTree = "<group>"; };
 
-		AC5CD8674373461C8D1B9B71 /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
-		63A6A2C2B6FF40DE9F02D992 /* OpenAIChatCompletionsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIChatCompletionsClient.swift; sourceTree = "<group>"; };
-		82B9EDE0EF024853A9455D2D /* OpenAIResponsesClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIResponsesClient.swift; sourceTree = "<group>"; };
-		307822B0F57F462D9D48A7B2 /* SSEParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEParser.swift; sourceTree = "<group>"; };
-		862F24C7DAD54E96B72770C3 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
-		AD70D96F01F3435B8BE0B54E /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		9085A8821D714A7CA0BC5FD4  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixiaChatApp.swift; sourceTree = "<group>"; };
+		ED9E2B0AB01247418A49D7EA  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9788E768F54E4D5C8E06E509  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListView.swift; sourceTree = "<group>"; };
+		BE052899F08A49699493A588  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		8788F0BDDE4E437DA035B3F7  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3339086E469A41AE8971DFE8  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
 
-		420FBA8B4AB94D939EAD0A5B /* ChatListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewModel.swift; sourceTree = "<group>"; };
-		04B864E7BE8749C1AA44AB92 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
-		A0C69949917F42C99FDD8CB3 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		FE70FCC9B189450E93CB088A  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		D8DACDA344AE4A6EA3E14223  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
+		77953CDE5AB0403089AF662E  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		0027FD175E874368B0CFFAB2  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataClass.swift"; sourceTree = "<group>"; };
+		05C1252FA3794DF4A0A33A00  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataProperties.swift"; sourceTree = "<group>"; };
 
-/* Begin PBXFrameworksBuildPhase section */
-		4A7FD201E9164703B45D80F5 /* Frameworks */ = {
+		1B13B0496A5B4CEAAE414968  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		31CE572357FB414DB26A27C6  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+
+		AC5CD8674373461C8D1B9B71  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
+		63A6A2C2B6FF40DE9F02D992  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIChatCompletionsClient.swift; sourceTree = "<group>"; };
+		82B9EDE0EF024853A9455D2D  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIResponsesClient.swift; sourceTree = "<group>"; };
+		307822B0F57F462D9D48A7B2  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEParser.swift; sourceTree = "<group>"; };
+		862F24C7DAD54E96B72770C3  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		AD70D96F01F3435B8BE0B54E  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+
+		420FBA8B4AB94D939EAD0A5B  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewModel.swift; sourceTree = "<group>"; };
+		04B864E7BE8749C1AA44AB92  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		A0C69949917F42C99FDD8CB3  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+
+
+
+		4A7FD201E9164703B45D80F5  = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXFrameworksBuildPhase section */
 
-/* Begin PBXGroup section */
+
+
 		36FC70A668604533909A866A = {
 			isa = PBXGroup;
 			children = (
-				8AE731BA4A3A4DE3A5A0FB76 /* pixia-chat */,
-				A9EE4F1FF3F84B7AB31E9365 /* Products */,
+				8AE731BA4A3A4DE3A5A0FB76 ,
+				A9EE4F1FF3F84B7AB31E9365 ,
 			);
 			sourceTree = "<group>";
 		};
 
-		A9EE4F1FF3F84B7AB31E9365 /* Products */ = {
+		A9EE4F1FF3F84B7AB31E9365  = {
 			isa = PBXGroup;
 			children = (
-				49E038529E774D348F9DE9E5 /* PixiaChat.app */,
+				49E038529E774D348F9DE9E5 ,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 
-		8AE731BA4A3A4DE3A5A0FB76 /* pixia-chat */ = {
+		8AE731BA4A3A4DE3A5A0FB76  = {
 			isa = PBXGroup;
 			children = (
-				3DF50B5690594DCFBC62629A /* App */,
-				E6A333F5DA114E28887ECAF4 /* Models */,
-				A1DA42CA8E2C4AFBB43E5B00 /* Stores */,
-				0CE7C09BEEFD4F6285FAC949 /* Services */,
-				D24296E29720454085D0A93A /* ViewModels */,
-				F0C6BBB019C94B1FA0184809 /* Views */,
-				B926525F49884EA789E1CF1B /* Resources */,
+				3DF50B5690594DCFBC62629A ,
+				E6A333F5DA114E28887ECAF4 ,
+				A1DA42CA8E2C4AFBB43E5B00 ,
+				0CE7C09BEEFD4F6285FAC949 ,
+				D24296E29720454085D0A93A ,
+				F0C6BBB019C94B1FA0184809 ,
+				B926525F49884EA789E1CF1B ,
 			);
 			sourceTree = "<group>";
 		};
 
-		3DF50B5690594DCFBC62629A /* App */ = {
+		3DF50B5690594DCFBC62629A  = {
 			isa = PBXGroup;
 			children = (
-				9085A8821D714A7CA0BC5FD4 /* PixiaChatApp.swift */,
+				9085A8821D714A7CA0BC5FD4 ,
 			);
 			path = App;
 			sourceTree = "<group>";
 		};
 
-		E6A333F5DA114E28887ECAF4 /* Models */ = {
+		E6A333F5DA114E28887ECAF4  = {
 			isa = PBXGroup;
 			children = (
-				FE70FCC9B189450E93CB088A /* ChatMessage.swift */,
-				D8DACDA344AE4A6EA3E14223 /* ChatSession+CoreDataClass.swift */,
-				77953CDE5AB0403089AF662E /* ChatSession+CoreDataProperties.swift */,
-				0027FD175E874368B0CFFAB2 /* Message+CoreDataClass.swift */,
-				05C1252FA3794DF4A0A33A00 /* Message+CoreDataProperties.swift */,
+				FE70FCC9B189450E93CB088A ,
+				D8DACDA344AE4A6EA3E14223 ,
+				77953CDE5AB0403089AF662E ,
+				0027FD175E874368B0CFFAB2 ,
+				05C1252FA3794DF4A0A33A00 ,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
 
-		A1DA42CA8E2C4AFBB43E5B00 /* Stores */ = {
+		A1DA42CA8E2C4AFBB43E5B00  = {
 			isa = PBXGroup;
 			children = (
-				1B13B0496A5B4CEAAE414968 /* PersistenceController.swift */,
-				31CE572357FB414DB26A27C6 /* ChatStore.swift */,
+				1B13B0496A5B4CEAAE414968 ,
+				31CE572357FB414DB26A27C6 ,
 			);
 			path = Stores;
 			sourceTree = "<group>";
 		};
 
-		0CE7C09BEEFD4F6285FAC949 /* Services */ = {
+		0CE7C09BEEFD4F6285FAC949  = {
 			isa = PBXGroup;
 			children = (
-				AC5CD8674373461C8D1B9B71 /* LLMClient.swift */,
-				63A6A2C2B6FF40DE9F02D992 /* OpenAIChatCompletionsClient.swift */,
-				82B9EDE0EF024853A9455D2D /* OpenAIResponsesClient.swift */,
-				307822B0F57F462D9D48A7B2 /* SSEParser.swift */,
-				862F24C7DAD54E96B72770C3 /* KeychainService.swift */,
-				AD70D96F01F3435B8BE0B54E /* SettingsStore.swift */,
+				AC5CD8674373461C8D1B9B71 ,
+				63A6A2C2B6FF40DE9F02D992 ,
+				82B9EDE0EF024853A9455D2D ,
+				307822B0F57F462D9D48A7B2 ,
+				862F24C7DAD54E96B72770C3 ,
+				AD70D96F01F3435B8BE0B54E ,
 			);
 			path = Services;
 			sourceTree = "<group>";
 		};
 
-		D24296E29720454085D0A93A /* ViewModels */ = {
+		D24296E29720454085D0A93A  = {
 			isa = PBXGroup;
 			children = (
-				420FBA8B4AB94D939EAD0A5B /* ChatListViewModel.swift */,
-				04B864E7BE8749C1AA44AB92 /* ChatViewModel.swift */,
-				A0C69949917F42C99FDD8CB3 /* SettingsViewModel.swift */,
+				420FBA8B4AB94D939EAD0A5B ,
+				04B864E7BE8749C1AA44AB92 ,
+				A0C69949917F42C99FDD8CB3 ,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
 
-		F0C6BBB019C94B1FA0184809 /* Views */ = {
+		F0C6BBB019C94B1FA0184809  = {
 			isa = PBXGroup;
 			children = (
-				ED9E2B0AB01247418A49D7EA /* RootView.swift */,
-				9788E768F54E4D5C8E06E509 /* ChatListView.swift */,
-				BE052899F08A49699493A588 /* ChatView.swift */,
-				8788F0BDDE4E437DA035B3F7 /* SettingsView.swift */,
-				3339086E469A41AE8971DFE8 /* ChatBubbleView.swift */,
+				ED9E2B0AB01247418A49D7EA ,
+				9788E768F54E4D5C8E06E509 ,
+				BE052899F08A49699493A588 ,
+				8788F0BDDE4E437DA035B3F7 ,
+				3339086E469A41AE8971DFE8 ,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
 
-		B926525F49884EA789E1CF1B /* Resources */ = {
+		B926525F49884EA789E1CF1B  = {
 			isa = PBXGroup;
 			children = (
-				94BB5FE08CE24CB3BC1D61D8 /* Assets.xcassets */,
-				CE7C48B47F3247C18CCF36EC /* LaunchScreen.storyboard */,
-				661A4F6D45F64D2CB8953E86 /* PixiaChat.xcdatamodeld */,
-				E029B7A66619443C97B80FA7 /* Info.plist */,
+				94BB5FE08CE24CB3BC1D61D8 ,
+				CE7C48B47F3247C18CCF36EC ,
+				661A4F6D45F64D2CB8953E86 ,
+				E029B7A66619443C97B80FA7 ,
 			);
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
 
-/* Begin PBXNativeTarget section */
-		2E0B4342D7CA40FE84A6550E /* PixiaChat */ = {
+
+
+		2E0B4342D7CA40FE84A6550E  = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B466AE8162EF4C1B8B4F4D95 /* Build configuration list for PBXNativeTarget "PixiaChat" */;
+			buildConfigurationList = B466AE8162EF4C1B8B4F4D95 ;
 			buildPhases = (
-				0AB7C9B516EC4B2DB322F481 /* Sources */,
-				4A7FD201E9164703B45D80F5 /* Frameworks */,
-				BBBE61C914B74F079CEAF30E /* Resources */,
+				0AB7C9B516EC4B2DB322F481 ,
+				4A7FD201E9164703B45D80F5 ,
+				BBBE61C914B74F079CEAF30E ,
 			);
 			buildRules = (
 			);
@@ -211,13 +211,13 @@
 			);
 			name = PixiaChat;
 			productName = PixiaChat;
-			productReference = 49E038529E774D348F9DE9E5 /* PixiaChat.app */;
+			productReference = 49E038529E774D348F9DE9E5 ;
 			productType = "com.apple.product-type.application";
 		};
-/* End PBXNativeTarget section */
 
-/* Begin PBXProject section */
-		38EDBD7E14184011B35BF5CB /* Project object */ = {
+
+
+		38EDBD7E14184011B35BF5CB  = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1500;
@@ -227,7 +227,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7AD7BCD5C42C4127B3E94D7D /* Build configuration list for PBXProject "pixia-chat" */;
+			buildConfigurationList = 7AD7BCD5C42C4127B3E94D7D ;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -235,65 +235,65 @@
 				en,
 			);
 			mainGroup = 36FC70A668604533909A866A;
-			productRefGroup = A9EE4F1FF3F84B7AB31E9365 /* Products */;
+			productRefGroup = A9EE4F1FF3F84B7AB31E9365 ;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2E0B4342D7CA40FE84A6550E /* PixiaChat */,
+				2E0B4342D7CA40FE84A6550E ,
 			);
 		};
-/* End PBXProject section */
 
-/* Begin PBXResourcesBuildPhase section */
-		BBBE61C914B74F079CEAF30E /* Resources */ = {
+
+
+		BBBE61C914B74F079CEAF30E  = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				72E05804EE264D71B61E615A /* Assets.xcassets in Resources */,
-				B93C4018C1F646F2BF946836 /* LaunchScreen.storyboard in Resources */,
-				7CA1A2927F584DA2A0F2F91D /* PixiaChat.xcdatamodeld in Resources */,
+				72E05804EE264D71B61E615A ,
+				B93C4018C1F646F2BF946836 ,
+				7CA1A2927F584DA2A0F2F91D ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXResourcesBuildPhase section */
 
-/* Begin PBXSourcesBuildPhase section */
-		0AB7C9B516EC4B2DB322F481 /* Sources */ = {
+
+
+		0AB7C9B516EC4B2DB322F481  = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9ED3B04C83674EB984281DBC /* PixiaChatApp.swift in Sources */,
-				BCF4090E3F56401B947B9B9C /* RootView.swift in Sources */,
-				93951AC8659A45D380A39DB9 /* ChatListView.swift in Sources */,
-				BC7789C8734748C8B6738763 /* ChatView.swift in Sources */,
-				C728FB52375040798F4C515D /* SettingsView.swift in Sources */,
-				71249ED6F9DD4B3A98F3C72B /* ChatBubbleView.swift in Sources */,
-				C219CEC0488D45DBB0794E8D /* ChatMessage.swift in Sources */,
-				E8A188E636894EB18ACCB8AC /* ChatSession+CoreDataClass.swift in Sources */,
-				07A4891B35EB4C55882E12FA /* ChatSession+CoreDataProperties.swift in Sources */,
-				CEFAEC2C75A54F3797EB6539 /* Message+CoreDataClass.swift in Sources */,
-				ABDFDAE9B6174D5BA8D75A2F /* Message+CoreDataProperties.swift in Sources */,
-				088B8CE2843943668261DA14 /* PersistenceController.swift in Sources */,
-				B632ED66DC694FAB98122CF0 /* ChatStore.swift in Sources */,
-				F8899BD277D44ED88B05F86E /* LLMClient.swift in Sources */,
-				B49FCBC83AC44C608CF2DC9D /* OpenAIChatCompletionsClient.swift in Sources */,
-				E54D7191DB424F3DACCDAA33 /* OpenAIResponsesClient.swift in Sources */,
-				909611446278464D846CC00B /* SSEParser.swift in Sources */,
-				B975F4D8ED03499991EEF3A7 /* KeychainService.swift in Sources */,
-				2E7F21FAC7094896B4D7A9B5 /* SettingsStore.swift in Sources */,
-				289E2F4DB4804C1D85770BE5 /* ChatListViewModel.swift in Sources */,
-				A7B4BA5EC541405C82D86552 /* ChatViewModel.swift in Sources */,
-				143494019139403E9F6F2EE6 /* SettingsViewModel.swift in Sources */,
+				9ED3B04C83674EB984281DBC ,
+				BCF4090E3F56401B947B9B9C ,
+				93951AC8659A45D380A39DB9 ,
+				BC7789C8734748C8B6738763 ,
+				C728FB52375040798F4C515D ,
+				71249ED6F9DD4B3A98F3C72B ,
+				C219CEC0488D45DBB0794E8D ,
+				E8A188E636894EB18ACCB8AC ,
+				07A4891B35EB4C55882E12FA ,
+				CEFAEC2C75A54F3797EB6539 ,
+				ABDFDAE9B6174D5BA8D75A2F ,
+				088B8CE2843943668261DA14 ,
+				B632ED66DC694FAB98122CF0 ,
+				F8899BD277D44ED88B05F86E ,
+				B49FCBC83AC44C608CF2DC9D ,
+				E54D7191DB424F3DACCDAA33 ,
+				909611446278464D846CC00B ,
+				B975F4D8ED03499991EEF3A7 ,
+				2E7F21FAC7094896B4D7A9B5 ,
+				289E2F4DB4804C1D85770BE5 ,
+				A7B4BA5EC541405C82D86552 ,
+				143494019139403E9F6F2EE6 ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-/* End PBXVariantGroup section */
 
-/* Begin XCBuildConfiguration section */
-		7E49334A5DF143DEA54602BA /* Debug */ = {
+
+
+
+
+		7E49334A5DF143DEA54602BA  = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -307,7 +307,7 @@
 			name = Debug;
 		};
 
-		35FF6540156F4BF1A5DF0A8F /* Release */ = {
+		35FF6540156F4BF1A5DF0A8F  = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
@@ -321,7 +321,7 @@
 			name = Release;
 		};
 
-		1F73283F93344B2680576002 /* Debug */ = {
+		1F73283F93344B2680576002  = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -343,7 +343,7 @@
 			name = Debug;
 		};
 
-		DAA09C0CA4854F1E81662362 /* Release */ = {
+		DAA09C0CA4854F1E81662362  = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -363,42 +363,42 @@
 			};
 			name = Release;
 		};
-/* End XCBuildConfiguration section */
 
-/* Begin XCConfigurationList section */
-		7AD7BCD5C42C4127B3E94D7D /* Build configuration list for PBXProject "pixia-chat" */ = {
+
+
+		7AD7BCD5C42C4127B3E94D7D  = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7E49334A5DF143DEA54602BA /* Debug */,
-				35FF6540156F4BF1A5DF0A8F /* Release */,
+				7E49334A5DF143DEA54602BA ,
+				35FF6540156F4BF1A5DF0A8F ,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 
-		B466AE8162EF4C1B8B4F4D95 /* Build configuration list for PBXNativeTarget "PixiaChat" */ = {
+		B466AE8162EF4C1B8B4F4D95  = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1F73283F93344B2680576002 /* Debug */,
-				DAA09C0CA4854F1E81662362 /* Release */,
+				1F73283F93344B2680576002 ,
+				DAA09C0CA4854F1E81662362 ,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-/* End XCConfigurationList section */
 
-/* Begin XCVersionGroup section */
-		661A4F6D45F64D2CB8953E86 /* PixiaChat.xcdatamodeld */ = {
+
+
+		661A4F6D45F64D2CB8953E86  = {
 			isa = XCVersionGroup;
 			children = (
-				07CE0A551DC343A298DB7FE9 /* PixiaChat.xcdatamodel */,
+				07CE0A551DC343A298DB7FE9 ,
 			);
-			currentVersion = 07CE0A551DC343A298DB7FE9 /* PixiaChat.xcdatamodel */;
+			currentVersion = 07CE0A551DC343A298DB7FE9 ;
 			path = PixiaChat.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
-/* End XCVersionGroup section */
+
 	};
-	rootObject = 38EDBD7E14184011B35BF5CB /* Project object */;
+	rootObject = 38EDBD7E14184011B35BF5CB ;
 }
