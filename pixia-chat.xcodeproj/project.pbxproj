@@ -32,7 +32,7 @@
 
 		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
 		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
-		7CA1A2927F584DA2A0F2F91D  = {isa = PBXBuildFile; fileRef = 07CE0A551DC343A298DB7FE9 ; };
+		7CA1A2927F584DA2A0F2F91D  = {isa = PBXBuildFile; fileRef = 661A4F6D45F64D2CB8953E86 ; };
 
 
 
@@ -189,7 +189,7 @@
 			children = (
 				94BB5FE08CE24CB3BC1D61D8 ,
 				CE7C48B47F3247C18CCF36EC ,
-				07CE0A551DC343A298DB7FE9 ,
+				661A4F6D45F64D2CB8953E86 ,
 				E029B7A66619443C97B80FA7 ,
 			);
 			sourceTree = "<group>";
@@ -392,6 +392,18 @@
 
 
 
+
+
+		661A4F6D45F64D2CB8953E86  = {
+			isa = XCVersionGroup;
+			children = (
+				07CE0A551DC343A298DB7FE9 ,
+			);
+			currentVersion = 07CE0A551DC343A298DB7FE9 ;
+			path = PixiaChat.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
 
 
 	};
