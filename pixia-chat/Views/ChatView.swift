@@ -25,7 +25,7 @@ struct ChatView: View {
 
     var body: some View {
         Group {
-            if isSessionDeleted || session.managedObjectContext == nil {
+            if isSessionDeleted || session.managedObjectContext == nil || session.isDeleted {
                 DeletedSessionView()
             } else {
                 VStack(spacing: 0) {
