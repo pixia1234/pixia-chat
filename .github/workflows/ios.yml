@@ -36,15 +36,15 @@ jobs:
           MODEL_DIR="pixia-chat/PixiaChat.xcdatamodeld"
           if [ -d "$MODEL_DIR" ]; then
             cat > "$MODEL_DIR/.xccurrentversion" <<'EOF'
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>_XCCurrentVersionName</key>
-              <string>PixiaChat.xcdatamodel</string>
-            </dict>
-            </plist>
-            EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>_XCCurrentVersionName</key>
+  <string>PixiaChat.xcdatamodel</string>
+</dict>
+</plist>
+EOF
             /usr/bin/plutil -convert binary1 "$MODEL_DIR/.xccurrentversion"
           else
             echo "Missing $MODEL_DIR"
