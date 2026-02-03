@@ -2,13 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
-    private let numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimum = 1
-        formatter.maximumFractionDigits = 0
-        return formatter
-    }()
 
     var body: some View {
         Form {
@@ -111,7 +104,7 @@ struct SettingsView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "number")
                         .foregroundColor(.indigo)
-                    TextField("最大 Tokens", value: $viewModel.maxTokens, formatter: numberFormatter)
+                    TextField("最大 Tokens", text: maxTokensTextBinding)
                         .keyboardType(.numberPad)
                         .textInputAutocapitalization(.never)
                 }
@@ -136,5 +129,21 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("设置")
+    }
+
+    private var maxTokensTextBinding: Binding<String> {
+        Binding(
+            get: {
+                viewModel.maxTokens == 0 ? "" : String(viewModel.maxTokens)
+            },
+            set: { newValue in
+                let filtered = newValue.filter { $0.isNumber }
+                if filtered.isEmpty {
+                    viewModel.maxTokens = 0
+                } else if let value = Int(filtered) {
+                    viewModel.maxTokens = value
+                }
+            }
+        )
     }
 }
