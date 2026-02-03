@@ -18,6 +18,7 @@ struct ChatSplitView: View {
     @State private var renamingSession: ChatSession?
     @State private var renameText: String = ""
     @State private var selectedSessionID: NSManagedObjectID?
+    @State private var searchText: String = ""
 
     private var viewModel: ChatListViewModel {
         ChatListViewModel(context: context)
@@ -57,16 +58,23 @@ struct ChatSplitView: View {
             Text("给这条对话起个新名字")
         }
         .onAppear {
-            if selectedSessionID == nil, let first = sessions.first {
+            if selectedSessionID == nil, let first = filteredSessions.first {
                 selectedSessionID = first.objectID
             }
+        }
+        .onChange(of: searchText) { _ in
+            if let selectedSessionID,
+               filteredSessions.contains(where: { $0.objectID == selectedSessionID }) {
+                return
+            }
+            selectedSessionID = filteredSessions.first?.objectID
         }
     }
 
     @available(iOS 16.0, *)
     private var chatListiOS16: some View {
         List(selection: $selectedSessionID) {
-            ForEach(sessions, id: \.objectID) { session in
+            ForEach(filteredSessions, id: \.objectID) { session in
                 NavigationLink(value: session.objectID) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
@@ -112,6 +120,7 @@ struct ChatSplitView: View {
             .onDelete(perform: delete)
         }
         .listStyle(.sidebar)
+        .searchable(text: $searchText, prompt: "搜索对话")
         .navigationTitle("对话")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -124,7 +133,7 @@ struct ChatSplitView: View {
 
     private var chatListiOS15: some View {
         List {
-            ForEach(sessions, id: \.objectID) { session in
+            ForEach(filteredSessions, id: \.objectID) { session in
                 NavigationLink(destination: ChatView(session: session, context: context, settings: settings)) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
@@ -169,6 +178,7 @@ struct ChatSplitView: View {
             .onDelete(perform: delete)
         }
         .listStyle(.sidebar)
+        .searchable(text: $searchText, prompt: "搜索对话")
         .navigationTitle("对话")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -200,7 +210,7 @@ struct ChatSplitView: View {
     }
 
     private func delete(at offsets: IndexSet) {
-        offsets.map { sessions[$0] }.forEach { session in
+        offsets.map { filteredSessions[$0] }.forEach { session in
             viewModel.deleteSession(session)
         }
     }
@@ -220,5 +230,26 @@ struct ChatSplitView: View {
         formatter.locale = Locale(identifier: "zh_CN")
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    private var filteredSessions: [ChatSession] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return Array(sessions) }
+        return sessions.filter { matches(session: $0, query: query) }
+    }
+
+    private func matches(session: ChatSession, query: String) -> Bool {
+        if session.title.localizedCaseInsensitiveContains(query) {
+            return true
+        }
+        if session.lastMessageText.localizedCaseInsensitiveContains(query) {
+            return true
+        }
+        for message in session.messagesArray {
+            if message.content.localizedCaseInsensitiveContains(query) {
+                return true
+            }
+        }
+        return false
     }
 }

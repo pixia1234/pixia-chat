@@ -17,6 +17,7 @@ struct ChatListView: View {
     @State private var showRename = false
     @State private var renamingSession: ChatSession?
     @State private var renameText: String = ""
+    @State private var searchText: String = ""
 
     private var viewModel: ChatListViewModel {
         ChatListViewModel(context: context)
@@ -25,7 +26,7 @@ struct ChatListView: View {
     var body: some View {
         ZStack {
             List {
-                ForEach(sessions, id: \.objectID) { session in
+                ForEach(filteredSessions, id: \.objectID) { session in
                     NavigationLink(destination: ChatView(session: session, context: context, settings: settings)) {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack(spacing: 6) {
@@ -72,13 +73,14 @@ struct ChatListView: View {
                 .onDelete(perform: delete)
             }
             .listStyle(.plain)
+            .searchable(text: $searchText, prompt: "搜索对话")
 
-            if sessions.isEmpty {
+            if filteredSessions.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "bubble.left.and.bubble.right")
                         .font(.system(size: 36))
                         .foregroundColor(.secondary)
-                    Text("开始你的第一条对话")
+                    Text(searchText.isEmpty ? "开始你的第一条对话" : "未找到匹配的对话")
                         .foregroundColor(.secondary)
                 }
             }
@@ -111,7 +113,7 @@ struct ChatListView: View {
     }
 
     private func delete(at offsets: IndexSet) {
-        offsets.map { sessions[$0] }.forEach { session in
+        offsets.map { filteredSessions[$0] }.forEach { session in
             viewModel.deleteSession(session)
         }
     }
@@ -131,5 +133,26 @@ struct ChatListView: View {
         formatter.locale = Locale(identifier: "zh_CN")
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    private var filteredSessions: [ChatSession] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return Array(sessions) }
+        return sessions.filter { matches(session: $0, query: query) }
+    }
+
+    private func matches(session: ChatSession, query: String) -> Bool {
+        if session.title.localizedCaseInsensitiveContains(query) {
+            return true
+        }
+        if session.lastMessageText.localizedCaseInsensitiveContains(query) {
+            return true
+        }
+        for message in session.messagesArray {
+            if message.content.localizedCaseInsensitiveContains(query) {
+                return true
+            }
+        }
+        return false
     }
 }
