@@ -33,23 +33,21 @@ jobs:
 
       - name: Ensure Core Data current version
         run: |
-          MODEL_DIR="pixia-chat/PixiaChat.xcdatamodeld"
-          if [ -d "$MODEL_DIR" ]; then
-            cat > "$MODEL_DIR/.xccurrentversion" <<'EOF'
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-              <key>_XCCurrentVersionName</key>
-              <string>PixiaChat.xcdatamodel</string>
-            </dict>
-            </plist>
-            EOF
-            /usr/bin/plutil -convert binary1 "$MODEL_DIR/.xccurrentversion"
-          else
-            echo "Missing $MODEL_DIR"
-            exit 1
-          fi
+          python3 - <<'PY'
+          import plistlib
+          import pathlib
+          import sys
+
+          model_dir = pathlib.Path("pixia-chat/PixiaChat.xcdatamodeld")
+          if not model_dir.is_dir():
+              print(f"Missing {model_dir}")
+              sys.exit(1)
+
+          data = {"_XCCurrentVersionName": "PixiaChat.xcdatamodel"}
+          (model_dir / ".xccurrentversion").write_bytes(
+              plistlib.dumps(data, fmt=plistlib.FMT_BINARY)
+          )
+          PY
 
       - name: Build (Simulator)
         run: |
