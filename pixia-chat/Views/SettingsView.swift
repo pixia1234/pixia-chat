@@ -50,7 +50,7 @@ struct SettingsView: View {
                     Text(String(format: "%.2f", viewModel.temperature))
                         .foregroundColor(.secondary)
                 }
-                Slider(value: $viewModel.temperature, in: 0...11, step: 0.05)
+                Slider(value: $viewModel.temperature, in: 0...1, step: 0.05)
 
                 Stepper(value: $viewModel.maxTokens, in: 64...8192, step: 64) {
                     Text("最大 Tokens：\(viewModel.maxTokens)")
