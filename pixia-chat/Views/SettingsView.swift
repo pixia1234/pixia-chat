@@ -99,6 +99,20 @@ struct SettingsView: View {
                     Label("流式输出", systemImage: "bolt.horizontal")
                 }
             }
+
+            Section(header: Text("调试")) {
+                Button("复制日志") {
+                    DebugLogger.copyToPasteboard()
+                    Haptics.light()
+                }
+                Button("清空日志") {
+                    DebugLogger.clear()
+                    Haptics.light()
+                }
+                Text("日志文件：Documents/pixia-debug.log")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
         }
         .navigationTitle("设置")
     }

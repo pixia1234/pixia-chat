@@ -30,6 +30,7 @@ final class ChatViewModel: ObservableObject {
         requestToken += 1
         let token = requestToken
         responseStartTime = Date()
+        DebugLogger.log("send start session=\(session.id.uuidString) token=\(token) stream=\(settings.stream)")
 
         let store = ChatStore(context: context)
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
@@ -38,12 +39,14 @@ final class ChatViewModel: ObservableObject {
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"
+            DebugLogger.log("send failed: invalid baseURL")
             endAwaiting(token: token)
             return
         }
         let apiKey = settings.apiKey
         guard !apiKey.isEmpty else {
             errorMessage = "API Key 为空"
+            DebugLogger.log("send failed: missing apiKey")
             endAwaiting(token: token)
             return
         }
@@ -72,6 +75,7 @@ final class ChatViewModel: ObservableObject {
                     }
                     self.finishStreaming(session: session, token: token)
                 } catch {
+                    DebugLogger.log("stream error: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                     self.isStreaming = false
                     self.endAwaiting(token: token)
@@ -87,6 +91,7 @@ final class ChatViewModel: ObservableObject {
                         store.addMessage(to: session, role: ChatRole.assistant, content: text)
                     }
                 } catch {
+                    DebugLogger.log("send error: \(error.localizedDescription)")
                     self.errorMessage = error.localizedDescription
                 }
                 self.endAwaiting(token: token)
@@ -100,6 +105,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func cancelStreaming() {
+        DebugLogger.log("cancelStreaming")
         streamTask?.cancel()
         assistantDraft = ""
         isStreaming = false
@@ -118,10 +124,15 @@ final class ChatViewModel: ObservableObject {
             let store = ChatStore(context: context)
             store.addMessage(to: session, role: ChatRole.assistant, content: draft)
         }
+        DebugLogger.log("finishStreaming token=\(token) chars=\(draft.count)")
     }
 
     private func isSessionValid(_ session: ChatSession) -> Bool {
-        session.managedObjectContext != nil && !session.isDeleted
+        let valid = session.managedObjectContext != nil && !session.isDeleted
+        if !valid {
+            DebugLogger.log("session invalid id=\(session.id.uuidString) deleted=\(session.isDeleted)")
+        }
+        return valid
     }
 
     private func endAwaiting(token: Int) {

@@ -11,11 +11,13 @@ struct ChatStore {
         session.createdAt = Date()
         session.updatedAt = Date()
         session.isPinned = false
+        DebugLogger.log("createSession id=\(session.id.uuidString)")
         saveContext()
         return session
     }
 
     func deleteSession(_ session: ChatSession) {
+        DebugLogger.log("deleteSession id=\(session.id.uuidString) deleted=\(session.isDeleted)")
         context.delete(session)
         saveContext()
     }
@@ -32,6 +34,7 @@ struct ChatStore {
         if session.title == "新的对话" && role == ChatRole.user {
             session.title = String(content.prefix(32))
         }
+        DebugLogger.log("addMessage session=\(session.id.uuidString) role=\(role) chars=\(content.count)")
         saveContext()
         return message
     }
@@ -41,12 +44,14 @@ struct ChatStore {
         guard !trimmed.isEmpty else { return }
         session.title = trimmed
         session.updatedAt = Date()
+        DebugLogger.log("renameSession id=\(session.id.uuidString) title=\(trimmed)")
         saveContext()
     }
 
     func togglePinned(_ session: ChatSession) {
         session.isPinned.toggle()
         session.updatedAt = Date()
+        DebugLogger.log("togglePinned id=\(session.id.uuidString) pinned=\(session.isPinned)")
         saveContext()
     }
 

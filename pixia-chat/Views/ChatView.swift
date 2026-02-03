@@ -101,6 +101,7 @@ struct ChatView: View {
             guard let deleted = note.userInfo?[NSDeletedObjectsKey] as? Set<NSManagedObject> else { return }
             if deleted.contains(where: { $0.objectID == session.objectID }) {
                 isSessionDeleted = true
+                DebugLogger.log("session deleted in view id=\(session.id.uuidString)")
                 viewModel.cancelStreaming()
                 dismiss()
             }
