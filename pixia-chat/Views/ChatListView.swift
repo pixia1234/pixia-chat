@@ -22,7 +22,7 @@ struct ChatListView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(session.title)
                             .font(.headline)
-                        Text(session.lastMessageText.isEmpty ? "No messages yet" : session.lastMessageText)
+                        Text(session.lastMessageText.isEmpty ? "暂无消息" : session.lastMessageText)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -32,7 +32,7 @@ struct ChatListView: View {
             .onDelete(perform: delete)
         }
         .listStyle(.plain)
-        .navigationTitle("pixia-chat")
+        .navigationTitle("Pixia Chat")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: addSession) {

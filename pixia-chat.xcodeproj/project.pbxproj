@@ -30,6 +30,8 @@
 		289E2F4DB4804C1D85770BE5  = {isa = PBXBuildFile; fileRef = 420FBA8B4AB94D939EAD0A5B ; };
 		A7B4BA5EC541405C82D86552  = {isa = PBXBuildFile; fileRef = 04B864E7BE8749C1AA44AB92 ; };
 		143494019139403E9F6F2EE6  = {isa = PBXBuildFile; fileRef = A0C69949917F42C99FDD8CB3 ; };
+		E3D9F30BD6A7439BA5C5C333  = {isa = PBXBuildFile; fileRef = C1B7D18AB4E64DF7B7B7A111 ; };
+		F4EA041CE7B24A8C94D4D444  = {isa = PBXBuildFile; fileRef = D2C8E29AC5F7428FA6A6B222 ; };
 
 		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
 		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
@@ -48,6 +50,8 @@
 		BE052899F08A49699493A588  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		8788F0BDDE4E437DA035B3F7  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3339086E469A41AE8971DFE8  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
+		C1B7D18AB4E64DF7B7B7A111  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSplitView.swift; sourceTree = "<group>"; };
+		D2C8E29AC5F7428FA6A6B222  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingIndicatorView.swift; sourceTree = "<group>"; };
 
 		FE70FCC9B189450E93CB088A  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		D8DACDA344AE4A6EA3E14223  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -181,6 +185,8 @@
 				BE052899F08A49699493A588 ,
 				8788F0BDDE4E437DA035B3F7 ,
 				3339086E469A41AE8971DFE8 ,
+				C1B7D18AB4E64DF7B7B7A111 ,
+				D2C8E29AC5F7428FA6A6B222 ,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -285,6 +291,8 @@
 				289E2F4DB4804C1D85770BE5 ,
 				A7B4BA5EC541405C82D86552 ,
 				143494019139403E9F6F2EE6 ,
+				E3D9F30BD6A7439BA5C5C333 ,
+				F4EA041CE7B24A8C94D4D444 ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

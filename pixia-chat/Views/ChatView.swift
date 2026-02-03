@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreData
+import UIKit
 
 struct ChatView: View {
     let session: ChatSession
@@ -14,6 +15,7 @@ struct ChatView: View {
             sortDescriptors: [NSSortDescriptor(keyPath: \Message.createdAt, ascending: true)],
             predicate: NSPredicate(format: "session == %@", session)
         )
+        UITextView.appearance().backgroundColor = .clear
     }
 
     var body: some View {
@@ -29,6 +31,10 @@ struct ChatView: View {
                             ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
                                 .id("draft")
                         }
+                        if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty {
+                            TypingBubbleView()
+                                .id("typing")
+                        }
                     }
                 }
                 .onChange(of: messages.count) { _ in
@@ -37,26 +43,41 @@ struct ChatView: View {
                 .onChange(of: viewModel.assistantDraft) { _ in
                     scrollToBottom(proxy: proxy)
                 }
+                .onChange(of: viewModel.isAwaitingResponse) { _ in
+                    scrollToBottom(proxy: proxy)
+                }
             }
 
             Divider()
 
             HStack(alignment: .bottom, spacing: 8) {
-                TextEditor(text: $viewModel.inputText)
-                    .frame(minHeight: 36, maxHeight: 120)
-                    .padding(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
+                ZStack(alignment: .topLeading) {
+                    if viewModel.inputText.isEmpty {
+                        Text("输入消息...")
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                    }
+                    TextEditor(text: $viewModel.inputText)
+                        .frame(minHeight: 36, maxHeight: 140)
+                        .padding(8)
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(UIColor.secondarySystemBackground))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.accentColor.opacity(0.25), lineWidth: 1)
+                )
 
                 if viewModel.isStreaming {
-                    Button("Stop") {
+                    Button("停止") {
                         viewModel.stopStreaming(session: session)
                     }
                     .buttonStyle(.bordered)
                 } else {
-                    Button("Send") {
+                    Button("发送") {
                         viewModel.send(session: session)
                     }
                     .buttonStyle(.borderedProminent)
@@ -70,7 +91,7 @@ struct ChatView: View {
             get: { viewModel.errorMessage != nil },
             set: { _ in viewModel.errorMessage = nil }
         )) {
-            Alert(title: Text("Error"), message: Text(viewModel.errorMessage ?? ""), dismissButton: .default(Text("OK")))
+            Alert(title: Text("错误"), message: Text(viewModel.errorMessage ?? ""), dismissButton: .default(Text("确定")))
         }
     }
 
@@ -83,6 +104,27 @@ struct ChatView: View {
             withAnimation {
                 proxy.scrollTo("draft", anchor: .bottom)
             }
+        } else if viewModel.isAwaitingResponse {
+            withAnimation {
+                proxy.scrollTo("typing", anchor: .bottom)
+            }
         }
+    }
+}
+
+private struct TypingBubbleView: View {
+    var body: some View {
+        HStack {
+            TypingIndicatorView()
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color.gray.opacity(0.2))
+                )
+            Spacer(minLength: 40)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
+        .padding(.vertical, 4)
     }
 }

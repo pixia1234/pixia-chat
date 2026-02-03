@@ -2,21 +2,28 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         TabView {
-            NavigationView {
-                ChatListView()
+            Group {
+                if horizontalSizeClass == .regular {
+                    ChatSplitView()
+                } else {
+                    NavigationView {
+                        ChatListView()
+                    }
+                }
             }
             .tabItem {
-                Label("Chats", systemImage: "message")
+                Label("对话", systemImage: "message")
             }
 
             NavigationView {
                 SettingsView(viewModel: SettingsViewModel(store: settings))
             }
             .tabItem {
-                Label("Settings", systemImage: "gear")
+                Label("设置", systemImage: "gear")
             }
         }
     }

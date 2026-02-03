@@ -6,6 +6,7 @@ final class ChatViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var assistantDraft: String = ""
     @Published var isStreaming: Bool = false
+    @Published var isAwaitingResponse: Bool = false
     @Published var errorMessage: String?
 
     private let context: NSManagedObjectContext
@@ -22,6 +23,7 @@ final class ChatViewModel: ObservableObject {
         guard !trimmed.isEmpty else { return }
         inputText = ""
         errorMessage = nil
+        isAwaitingResponse = true
 
         let store = ChatStore(context: context)
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
@@ -29,12 +31,14 @@ final class ChatViewModel: ObservableObject {
         let messages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
 
         guard let url = URL(string: settings.baseURL) else {
-            errorMessage = "Invalid Base URL"
+            errorMessage = "Base URL 无效"
+            isAwaitingResponse = false
             return
         }
         let apiKey = settings.apiKey
         guard !apiKey.isEmpty else {
-            errorMessage = "API Key is missing"
+            errorMessage = "API Key 为空"
+            isAwaitingResponse = false
             return
         }
 
@@ -64,6 +68,7 @@ final class ChatViewModel: ObservableObject {
                 } catch {
                     self.errorMessage = error.localizedDescription
                     self.isStreaming = false
+                    self.isAwaitingResponse = false
                     self.streamTask = nil
                 }
             }
@@ -76,6 +81,7 @@ final class ChatViewModel: ObservableObject {
                 } catch {
                     self.errorMessage = error.localizedDescription
                 }
+                self.isAwaitingResponse = false
             }
         }
     }
@@ -91,6 +97,7 @@ final class ChatViewModel: ObservableObject {
         let draft = assistantDraft
         assistantDraft = ""
         isStreaming = false
+        isAwaitingResponse = false
         streamTask = nil
         if !draft.isEmpty {
             store.addMessage(to: session, role: ChatRole.assistant, content: draft)

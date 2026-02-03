@@ -5,44 +5,60 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("API"), footer: Text("API Key is stored in Keychain on this device.")) {
+            Section(header: Text("API"), footer: Text("API Key 会安全存储在本机钥匙串中。")) {
                 SecureField("API Key", text: $viewModel.apiKey)
                 TextField("Base URL", text: $viewModel.baseURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Picker("API Mode", selection: $viewModel.apiMode) {
+                Picker("接口模式", selection: $viewModel.apiMode) {
                     ForEach(APIMode.allCases) { mode in
                         Text(mode.title).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
 
-                Button("Clear API Key") {
+                Button("清除 API Key") {
                     viewModel.clearKey()
                 }
                 .foregroundColor(.red)
+
+                Button(action: { viewModel.testConnection() }) {
+                    HStack(spacing: 8) {
+                        if viewModel.isTesting {
+                            ProgressView()
+                        }
+                        Text("测试连接")
+                    }
+                }
+                .disabled(viewModel.isTesting)
+
+                if let status = viewModel.testStatus {
+                    Text(status)
+                        .font(.footnote)
+                        .foregroundColor(status.contains("成功") ? .green : .secondary)
+                }
             }
 
-            Section(header: Text("Model")) {
-                TextField("Default Model", text: $viewModel.model)
+            Section(header: Text("模型")) {
+                TextField("默认模型", text: $viewModel.model)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
 
                 HStack {
-                    Text("Temperature")
+                    Text("温度")
                     Spacer()
                     Text(String(format: "%.2f", viewModel.temperature))
                         .foregroundColor(.secondary)
                 }
-                Slider(value: $viewModel.temperature, in: 0...2, step: 0.05)
+                Slider(value: $viewModel.temperature, in: 0...11, step: 0.05)
 
                 Stepper(value: $viewModel.maxTokens, in: 64...8192, step: 64) {
-                    Text("Max Tokens: \(viewModel.maxTokens)")
+                    Text("最大 Tokens：\(viewModel.maxTokens)")
                 }
 
-                Toggle("Stream", isOn: $viewModel.stream)
+                Toggle("流式输出", isOn: $viewModel.stream)
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle("设置")
     }
 }

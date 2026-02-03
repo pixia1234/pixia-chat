@@ -8,8 +8,8 @@ enum APIMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .chatCompletions: return "Chat Completions"
-        case .responses: return "Responses"
+        case .chatCompletions: return "聊天补全 (Chat Completions)"
+        case .responses: return "Responses (响应)"
         }
     }
 }

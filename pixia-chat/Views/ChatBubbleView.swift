@@ -11,9 +11,12 @@ struct ChatBubbleView: View {
             }
             Text(text)
                 .padding(12)
-                .background(isUser ? Color.accentColor.opacity(0.85) : Color.gray.opacity(0.2))
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(isUser ? Color.accentColor.opacity(0.9) : Color.gray.opacity(0.2))
+                )
                 .foregroundColor(isUser ? .white : .primary)
-                .cornerRadius(14)
+                .frame(maxWidth: 520, alignment: isUser ? .trailing : .leading)
             if !isUser {
                 Spacer(minLength: 40)
             }
