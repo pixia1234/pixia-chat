@@ -25,6 +25,9 @@ final class OpenAIResponsesClient: LLMClient {
         try Self.validate(response, data: data)
 
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        if let errorMessage = Self.extractErrorMessage(from: json) {
+            throw NSError(domain: "HTTP", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+        }
         return Self.extractOutputText(from: json) ?? ""
     }
 
@@ -58,6 +61,10 @@ final class OpenAIResponsesClient: LLMClient {
                         for event in parser.feed(line: line) {
                             if event == "[DONE]" {
                                 continuation.finish()
+                                return
+                            }
+                            if let errorMessage = Self.extractErrorMessage(fromLine: event) {
+                                continuation.finish(throwing: NSError(domain: "HTTP", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
                                 return
                             }
                             if let delta = Self.extractOutputDelta(from: event) {
@@ -194,5 +201,24 @@ final class OpenAIResponsesClient: LLMClient {
             return false
         }
         return type == "response.completed" || type == "response.failed" || type == "response.canceled"
+    }
+
+    private static func extractErrorMessage(from json: [String: Any]?) -> String? {
+        if let error = json?["error"] as? [String: Any],
+           let message = error["message"] as? String {
+            return message
+        }
+        if let message = json?["message"] as? String {
+            return message
+        }
+        return nil
+    }
+
+    private static func extractErrorMessage(fromLine jsonLine: String) -> String? {
+        guard let data = jsonLine.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return extractErrorMessage(from: obj)
     }
 }

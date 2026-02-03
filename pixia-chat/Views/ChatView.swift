@@ -60,7 +60,7 @@ struct ChatView: View {
                     Divider()
 
                     VStack(spacing: 8) {
-                        if viewModel.isAwaitingResponse {
+                        if viewModel.isAwaitingResponse || viewModel.isStreaming {
                             ThinkingBarView()
                         }
 
@@ -89,7 +89,7 @@ struct ChatView: View {
                 }
             }
         }
-        .navigationTitle(session.title)
+        .navigationTitle(titleText)
         .navigationBarTitleDisplayMode(.inline)
         .alert(isPresented: Binding(
             get: { viewModel.errorMessage != nil },
@@ -101,6 +101,7 @@ struct ChatView: View {
             guard let deleted = note.userInfo?[NSDeletedObjectsKey] as? Set<NSManagedObject> else { return }
             if deleted.contains(where: { $0.objectID == session.objectID }) {
                 isSessionDeleted = true
+                viewModel.cancelStreaming()
                 dismiss()
             }
         }
@@ -163,6 +164,13 @@ struct ChatView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             sendPulse = false
         }
+    }
+
+    private var titleText: String {
+        if isSessionDeleted || session.managedObjectContext == nil || session.isDeleted {
+            return "对话已删除"
+        }
+        return session.title
     }
 }
 

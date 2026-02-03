@@ -12,6 +12,8 @@ final class ChatViewModel: ObservableObject {
     private let context: NSManagedObjectContext
     private let settings: SettingsStore
     private var streamTask: Task<Void, Never>?
+    private var requestToken: Int = 0
+    private var responseStartTime: Date?
 
     init(context: NSManagedObjectContext, settings: SettingsStore) {
         self.context = context
@@ -19,11 +21,15 @@ final class ChatViewModel: ObservableObject {
     }
 
     func send(session: ChatSession) {
+        guard isSessionValid(session) else { return }
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         inputText = ""
         errorMessage = nil
         isAwaitingResponse = true
+        requestToken += 1
+        let token = requestToken
+        responseStartTime = Date()
 
         let store = ChatStore(context: context)
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
@@ -32,13 +38,13 @@ final class ChatViewModel: ObservableObject {
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"
-            isAwaitingResponse = false
+            endAwaiting(token: token)
             return
         }
         let apiKey = settings.apiKey
         guard !apiKey.isEmpty else {
             errorMessage = "API Key 为空"
-            isAwaitingResponse = false
+            endAwaiting(token: token)
             return
         }
 
@@ -64,11 +70,11 @@ final class ChatViewModel: ObservableObject {
                         if Task.isCancelled { break }
                         self.assistantDraft += token
                     }
-                    self.finishStreaming(session: session)
+                    self.finishStreaming(session: session, token: token)
                 } catch {
                     self.errorMessage = error.localizedDescription
                     self.isStreaming = false
-                    self.isAwaitingResponse = false
+                    self.endAwaiting(token: token)
                     self.streamTask = nil
                 }
             }
@@ -77,30 +83,66 @@ final class ChatViewModel: ObservableObject {
                 guard let self else { return }
                 do {
                     let text = try await client.send(messages: messages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
-                    store.addMessage(to: session, role: ChatRole.assistant, content: text)
+                    if self.isSessionValid(session) {
+                        store.addMessage(to: session, role: ChatRole.assistant, content: text)
+                    }
                 } catch {
                     self.errorMessage = error.localizedDescription
                 }
-                self.isAwaitingResponse = false
+                self.endAwaiting(token: token)
             }
         }
     }
 
     func stopStreaming(session: ChatSession) {
         streamTask?.cancel()
-        finishStreaming(session: session)
+        finishStreaming(session: session, token: requestToken)
     }
 
-    private func finishStreaming(session: ChatSession) {
-        guard isStreaming || !assistantDraft.isEmpty else { return }
-        let store = ChatStore(context: context)
-        let draft = assistantDraft
+    func cancelStreaming() {
+        streamTask?.cancel()
         assistantDraft = ""
         isStreaming = false
         isAwaitingResponse = false
         streamTask = nil
-        if !draft.isEmpty {
+    }
+
+    private func finishStreaming(session: ChatSession, token: Int) {
+        guard isStreaming || !assistantDraft.isEmpty else { return }
+        let draft = assistantDraft
+        assistantDraft = ""
+        isStreaming = false
+        endAwaiting(token: token)
+        streamTask = nil
+        if !draft.isEmpty, isSessionValid(session) {
+            let store = ChatStore(context: context)
             store.addMessage(to: session, role: ChatRole.assistant, content: draft)
         }
+    }
+
+    private func isSessionValid(_ session: ChatSession) -> Bool {
+        session.managedObjectContext != nil && !session.isDeleted
+    }
+
+    private func endAwaiting(token: Int) {
+        guard token == requestToken else { return }
+        let minDuration: TimeInterval = 0.6
+        if let startedAt = responseStartTime {
+            let elapsed = Date().timeIntervalSince(startedAt)
+            if elapsed < minDuration {
+                let delay = minDuration - elapsed
+                Task { [weak self] in
+                    guard let self else { return }
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    if self.requestToken == token {
+                        self.isAwaitingResponse = false
+                    }
+                }
+                responseStartTime = nil
+                return
+            }
+        }
+        isAwaitingResponse = false
+        responseStartTime = nil
     }
 }
