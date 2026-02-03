@@ -18,7 +18,9 @@
     <string>1</string>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
-    <key>UIApplicationSupportsIndirectInputEvents</key>
-    <true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIRequiresFullScreen</key>
+	<false/>
 </dict>
 </plist>
