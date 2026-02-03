@@ -21,7 +21,7 @@ struct ChatBubbleView: View {
     }
 
     private var isUser: Bool {
-        role == ChatRole.user
+        role == ChatRole.user || role == ChatRole.system
     }
 
     private var avatarView: some View {

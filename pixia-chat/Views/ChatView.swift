@@ -4,7 +4,7 @@ import UIKit
 
 struct ChatView: View {
     @ObservedObject var session: ChatSession
-    @ObservedObject var viewModel: ChatViewModel
+    @StateObject private var viewModel: ChatViewModel
 
     @FetchRequest private var messages: FetchedResults<Message>
     @State private var sendPulse = false
@@ -13,9 +13,9 @@ struct ChatView: View {
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
 
-    init(session: ChatSession, viewModel: ChatViewModel) {
+    init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {
         self._session = ObservedObject(wrappedValue: session)
-        self.viewModel = viewModel
+        self._viewModel = StateObject(wrappedValue: ChatViewModel(context: context, settings: settings))
         _messages = FetchRequest<Message>(
             sortDescriptors: [NSSortDescriptor(keyPath: \Message.createdAt, ascending: true)],
             predicate: NSPredicate(format: "session == %@", session)

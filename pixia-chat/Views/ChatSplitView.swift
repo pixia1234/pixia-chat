@@ -26,11 +26,12 @@ struct ChatSplitView: View {
     var body: some View {
         Group {
             if #available(iOS 16.0, *) {
-                NavigationSplitView {
+                NavigationSplitView(columnVisibility: .constant(.all)) {
                     chatListiOS16
                 } detail: {
                     if let session = selectedSession {
-                        ChatView(session: session, viewModel: ChatViewModel(context: context, settings: settings))
+                        ChatView(session: session, context: context, settings: settings)
+                            .id(session.objectID)
                     } else {
                         placeholderView
                     }
@@ -40,7 +41,7 @@ struct ChatSplitView: View {
                     chatListiOS15
                     placeholderView
                 }
-                .navigationViewStyle(.columns)
+                .navigationViewStyle(DoubleColumnNavigationViewStyle())
             }
         }
         .alert("重命名", isPresented: $showRename) {
@@ -124,7 +125,7 @@ struct ChatSplitView: View {
     private var chatListiOS15: some View {
         List {
             ForEach(sessions, id: \.objectID) { session in
-                NavigationLink(destination: ChatView(session: session, viewModel: ChatViewModel(context: context, settings: settings))) {
+                NavigationLink(destination: ChatView(session: session, context: context, settings: settings)) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
                             Text(session.title)

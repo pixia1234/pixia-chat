@@ -7,7 +7,7 @@ struct SettingsSplitView: View {
     var body: some View {
         Group {
             if #available(iOS 16.0, *) {
-                NavigationSplitView {
+                NavigationSplitView(columnVisibility: .constant(.all)) {
                     List(selection: $selection) {
                         Label("设置", systemImage: "gear")
                             .tag("settings")
@@ -27,7 +27,7 @@ struct SettingsSplitView: View {
 
                     SettingsView(viewModel: SettingsViewModel(store: settings))
                 }
-                .navigationViewStyle(.columns)
+                .navigationViewStyle(DoubleColumnNavigationViewStyle())
             }
         }
     }

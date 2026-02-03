@@ -39,7 +39,7 @@ final class ChatViewModel: ObservableObject {
 
         let store = ChatStore(context: context)
         let systemPrompt = settings.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        if session.messagesArray.first?.role != ChatRole.system, !systemPrompt.isEmpty {
+        if session.messagesArray.isEmpty, !systemPrompt.isEmpty {
             store.addMessage(to: session, role: ChatRole.system, content: systemPrompt)
         }
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)

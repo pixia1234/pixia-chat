@@ -26,7 +26,7 @@ struct ChatListView: View {
         ZStack {
             List {
                 ForEach(sessions, id: \.objectID) { session in
-                    NavigationLink(destination: ChatView(session: session, viewModel: ChatViewModel(context: context, settings: settings))) {
+                    NavigationLink(destination: ChatView(session: session, context: context, settings: settings)) {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack(spacing: 6) {
                                 Text(session.title)
