@@ -15,6 +15,9 @@ jobs:
       TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
       PROFILE_NAME: ${{ secrets.IOS_PROFILE_NAME }}
       EXPORT_METHOD: ${{ secrets.IOS_EXPORT_METHOD }}
+      P12_BASE64: ${{ secrets.IOS_CERT_P12 }}
+      P12_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+      PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,10 +41,7 @@ jobs:
             build
 
       - name: Install signing certificate
-        if: ${{ secrets.IOS_CERT_P12 != '' && secrets.IOS_CERT_PASSWORD != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' && secrets.IOS_PROFILE_NAME != '' }}
-        env:
-          P12_BASE64: ${{ secrets.IOS_CERT_P12 }}
-          P12_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+        if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
           KEYCHAIN_PASSWORD=$(uuidgen)
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
@@ -53,15 +53,13 @@ jobs:
           security default-keychain -s build.keychain
 
       - name: Install provisioning profile
-        if: ${{ secrets.IOS_CERT_P12 != '' && secrets.IOS_CERT_PASSWORD != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' && secrets.IOS_PROFILE_NAME != '' }}
-        env:
-          PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
       - name: Archive
-        if: ${{ secrets.IOS_CERT_P12 != '' && secrets.IOS_CERT_PASSWORD != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' && secrets.IOS_PROFILE_NAME != '' }}
+        if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
           xcodebuild \
             -project "$PROJECT" \
@@ -76,7 +74,7 @@ jobs:
             clean archive
 
       - name: Export IPA
-        if: ${{ secrets.IOS_CERT_P12 != '' && secrets.IOS_CERT_PASSWORD != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' && secrets.IOS_PROFILE_NAME != '' }}
+        if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
           mkdir -p build/export
           EXPORT_METHOD_VALUE=${EXPORT_METHOD:-ad-hoc}
@@ -106,7 +104,7 @@ jobs:
             -exportPath "$PWD/build/export"
 
       - name: Upload IPA
-        if: ${{ secrets.IOS_CERT_P12 != '' && secrets.IOS_CERT_PASSWORD != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' && secrets.IOS_PROFILE_NAME != '' }}
+        if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: PixiaChat-ipa
