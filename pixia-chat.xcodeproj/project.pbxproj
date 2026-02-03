@@ -27,6 +27,7 @@
 		909611446278464D846CC00B  = {isa = PBXBuildFile; fileRef = 307822B0F57F462D9D48A7B2 ; };
 		B975F4D8ED03499991EEF3A7  = {isa = PBXBuildFile; fileRef = 862F24C7DAD54E96B72770C3 ; };
 		2E7F21FAC7094896B4D7A9B5  = {isa = PBXBuildFile; fileRef = AD70D96F01F3435B8BE0B54E ; };
+		6A86A701FF6E4F78A62EA111  = {isa = PBXBuildFile; fileRef = 5D2F8A6C20974D63A6D7D222 ; };
 		289E2F4DB4804C1D85770BE5  = {isa = PBXBuildFile; fileRef = 420FBA8B4AB94D939EAD0A5B ; };
 		A7B4BA5EC541405C82D86552  = {isa = PBXBuildFile; fileRef = 04B864E7BE8749C1AA44AB92 ; };
 		143494019139403E9F6F2EE6  = {isa = PBXBuildFile; fileRef = A0C69949917F42C99FDD8CB3 ; };
@@ -69,6 +70,7 @@
 		307822B0F57F462D9D48A7B2  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSEParser.swift; sourceTree = "<group>"; };
 		862F24C7DAD54E96B72770C3  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		AD70D96F01F3435B8BE0B54E  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		5D2F8A6C20974D63A6D7D222  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 
 		420FBA8B4AB94D939EAD0A5B  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewModel.swift; sourceTree = "<group>"; };
 		04B864E7BE8749C1AA44AB92  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 				307822B0F57F462D9D48A7B2 ,
 				862F24C7DAD54E96B72770C3 ,
 				AD70D96F01F3435B8BE0B54E ,
+				5D2F8A6C20974D63A6D7D222 ,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -288,6 +291,7 @@
 				909611446278464D846CC00B ,
 				B975F4D8ED03499991EEF3A7 ,
 				2E7F21FAC7094896B4D7A9B5 ,
+				6A86A701FF6E4F78A62EA111 ,
 				289E2F4DB4804C1D85770BE5 ,
 				A7B4BA5EC541405C82D86552 ,
 				143494019139403E9F6F2EE6 ,

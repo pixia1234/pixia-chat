@@ -14,4 +14,12 @@ final class ChatListViewModel: ObservableObject {
     func deleteSession(_ session: ChatSession) {
         store.deleteSession(session)
     }
+
+    func renameSession(_ session: ChatSession, title: String) {
+        store.renameSession(session, title: title)
+    }
+
+    func togglePinned(_ session: ChatSession) {
+        store.togglePinned(session)
+    }
 }

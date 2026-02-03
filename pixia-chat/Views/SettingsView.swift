@@ -12,25 +12,46 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("API"), footer: Text("API Key 会安全存储在本机钥匙串中。")) {
-                SecureField("API Key", text: $viewModel.apiKey)
-                TextField("Base URL", text: $viewModel.baseURL)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                Picker("接口模式", selection: $viewModel.apiMode) {
-                    ForEach(APIMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
-                    }
+            Section(header: Text("API 设置"), footer: Text("API Key 会安全存储在本机钥匙串中。")) {
+                HStack(spacing: 10) {
+                    Image(systemName: "key.fill")
+                        .foregroundColor(.orange)
+                    SecureField("API Key", text: $viewModel.apiKey)
                 }
-                .pickerStyle(.segmented)
 
-                Button("清除 API Key") {
-                    viewModel.clearKey()
+                HStack(spacing: 10) {
+                    Image(systemName: "link")
+                        .foregroundColor(.blue)
+                    TextField("Base URL", text: $viewModel.baseURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                 }
-                .foregroundColor(.red)
+
+                HStack(spacing: 10) {
+                    Image(systemName: "switch.2")
+                        .foregroundColor(.purple)
+                    Picker("接口模式", selection: $viewModel.apiMode) {
+                        ForEach(APIMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                HStack(spacing: 10) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                    Button("清除 API Key") {
+                        viewModel.clearKey()
+                        Haptics.light()
+                    }
+                    .foregroundColor(.red)
+                }
 
                 Button(action: { viewModel.testConnection() }) {
                     HStack(spacing: 8) {
+                        Image(systemName: "checkmark.seal")
+                            .foregroundColor(.green)
                         if viewModel.isTesting {
                             ProgressView()
                         }
@@ -46,24 +67,37 @@ struct SettingsView: View {
                 }
             }
 
-            Section(header: Text("模型")) {
-                TextField("默认模型", text: $viewModel.model)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+            Section(header: Text("参数调节")) {
+                HStack(spacing: 10) {
+                    Image(systemName: "cpu")
+                        .foregroundColor(.teal)
+                    TextField("默认模型", text: $viewModel.model)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
 
                 HStack {
+                    Image(systemName: "thermometer")
+                        .foregroundColor(.pink)
                     Text("温度")
                     Spacer()
                     Text(String(format: "%.2f", viewModel.temperature))
                         .foregroundColor(.secondary)
                 }
                 Slider(value: $viewModel.temperature, in: 0...1, step: 0.05)
+                    .tint(.cyan)
 
-                TextField("最大 Tokens", value: $viewModel.maxTokens, formatter: numberFormatter)
-                    .keyboardType(.numberPad)
-                    .textInputAutocapitalization(.never)
+                HStack(spacing: 10) {
+                    Image(systemName: "number")
+                        .foregroundColor(.indigo)
+                    TextField("最大 Tokens", value: $viewModel.maxTokens, formatter: numberFormatter)
+                        .keyboardType(.numberPad)
+                        .textInputAutocapitalization(.never)
+                }
 
-                Toggle("流式输出", isOn: $viewModel.stream)
+                Toggle(isOn: $viewModel.stream) {
+                    Label("流式输出", systemImage: "bolt.horizontal")
+                }
             }
         }
         .navigationTitle("设置")

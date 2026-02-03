@@ -26,5 +26,6 @@ struct RootView: View {
                 Label("设置", systemImage: "gear")
             }
         }
+        .tint(Color(red: 0.2, green: 0.72, blue: 0.9))
     }
 }

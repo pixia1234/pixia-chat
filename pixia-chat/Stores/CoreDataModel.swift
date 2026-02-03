@@ -32,6 +32,12 @@ enum CoreDataModel {
         sessionUpdatedAt.attributeType = .dateAttributeType
         sessionUpdatedAt.isOptional = false
 
+        let sessionPinned = NSAttributeDescription()
+        sessionPinned.name = "isPinned"
+        sessionPinned.attributeType = .booleanAttributeType
+        sessionPinned.isOptional = false
+        sessionPinned.defaultValue = false
+
         let messageId = NSAttributeDescription()
         messageId.name = "id"
         messageId.attributeType = .UUIDAttributeType
@@ -71,7 +77,7 @@ enum CoreDataModel {
         messagesRel.inverseRelationship = sessionRel
         sessionRel.inverseRelationship = messagesRel
 
-        sessionEntity.properties = [sessionId, sessionTitle, sessionCreatedAt, sessionUpdatedAt, messagesRel]
+        sessionEntity.properties = [sessionId, sessionTitle, sessionCreatedAt, sessionUpdatedAt, sessionPinned, messagesRel]
         messageEntity.properties = [messageId, messageRole, messageContent, messageCreatedAt, sessionRel]
 
         model.entities = [sessionEntity, messageEntity]

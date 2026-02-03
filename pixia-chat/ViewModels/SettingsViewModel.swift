@@ -83,11 +83,13 @@ final class SettingsViewModel: ObservableObject {
                 await MainActor.run {
                     self.testStatus = "连接成功"
                     self.isTesting = false
+                    Haptics.success()
                 }
             } catch {
                 await MainActor.run {
                     self.testStatus = "测试失败：\(error.localizedDescription)"
                     self.isTesting = false
+                    Haptics.light()
                 }
             }
         }

@@ -7,9 +7,10 @@ struct ChatStore {
     func createSession(title: String? = nil) -> ChatSession {
         let session = ChatSession(context: context)
         session.id = UUID()
-        session.title = title ?? "New Chat"
+        session.title = title ?? "新的对话"
         session.createdAt = Date()
         session.updatedAt = Date()
+        session.isPinned = false
         saveContext()
         return session
     }
@@ -28,11 +29,25 @@ struct ChatStore {
         message.createdAt = Date()
         message.session = session
         session.updatedAt = Date()
-        if session.title == "New Chat" && role == ChatRole.user {
+        if session.title == "新的对话" && role == ChatRole.user {
             session.title = String(content.prefix(32))
         }
         saveContext()
         return message
+    }
+
+    func renameSession(_ session: ChatSession, title: String) {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        session.title = trimmed
+        session.updatedAt = Date()
+        saveContext()
+    }
+
+    func togglePinned(_ session: ChatSession) {
+        session.isPinned.toggle()
+        session.updatedAt = Date()
+        saveContext()
     }
 
     func saveContext() {
