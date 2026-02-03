@@ -76,6 +76,27 @@ struct SettingsView: View {
                         .autocorrectionDisabled()
                 }
 
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "quote.bubble")
+                        .foregroundColor(.mint)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("System Prompt")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        if #available(iOS 16.0, *) {
+                            TextField("you are a helpful assistant", text: $viewModel.systemPrompt, axis: .vertical)
+                                .lineLimit(2...6)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                        } else {
+                            TextEditor(text: $viewModel.systemPrompt)
+                                .frame(minHeight: 60, maxHeight: 140)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                        }
+                    }
+                }
+
                 HStack {
                     Image(systemName: "thermometer")
                         .foregroundColor(.pink)

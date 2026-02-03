@@ -23,6 +23,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var stream: Bool {
         didSet { store.stream = stream }
     }
+    @Published var systemPrompt: String {
+        didSet { store.systemPrompt = systemPrompt }
+    }
     @Published var isTesting: Bool = false
     @Published var testStatus: String?
 
@@ -37,6 +40,7 @@ final class SettingsViewModel: ObservableObject {
         self.temperature = store.temperature
         self.maxTokens = store.maxTokens
         self.stream = store.stream
+        self.systemPrompt = store.systemPrompt
     }
 
     func clearKey() {

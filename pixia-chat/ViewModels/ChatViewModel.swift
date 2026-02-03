@@ -36,7 +36,13 @@ final class ChatViewModel: ObservableObject {
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
 
         let messages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
-        let requestMessages = [ChatMessage(role: ChatRole.system, content: "you are a helpful assistant")] + messages
+        let systemPrompt = settings.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        let requestMessages: [ChatMessage]
+        if systemPrompt.isEmpty {
+            requestMessages = messages
+        } else {
+            requestMessages = [ChatMessage(role: ChatRole.system, content: systemPrompt)] + messages
+        }
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"

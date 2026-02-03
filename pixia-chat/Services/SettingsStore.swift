@@ -22,6 +22,7 @@ final class SettingsStore: ObservableObject {
         static let temperature = "temperature"
         static let maxTokens = "max_tokens"
         static let stream = "stream"
+        static let systemPrompt = "system_prompt"
     }
 
     @Published var baseURL: String {
@@ -42,6 +43,9 @@ final class SettingsStore: ObservableObject {
     @Published var stream: Bool {
         didSet { UserDefaults.standard.set(stream, forKey: Keys.stream) }
     }
+    @Published var systemPrompt: String {
+        didSet { UserDefaults.standard.set(systemPrompt, forKey: Keys.systemPrompt) }
+    }
 
     @Published var apiKey: String {
         didSet {
@@ -61,6 +65,7 @@ final class SettingsStore: ObservableObject {
         temperature = defaults.object(forKey: Keys.temperature) as? Double ?? 0.7
         maxTokens = defaults.object(forKey: Keys.maxTokens) as? Int ?? 256000
         stream = defaults.object(forKey: Keys.stream) as? Bool ?? true
+        systemPrompt = defaults.string(forKey: Keys.systemPrompt) ?? "you are a helpful assistant"
         apiKey = KeychainService.shared.get("openai_api_key") ?? ""
     }
 }
