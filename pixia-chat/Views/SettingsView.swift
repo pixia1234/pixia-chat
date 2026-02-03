@@ -2,6 +2,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
+    private let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimum = 1
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
 
     var body: some View {
         Form {
@@ -52,9 +59,9 @@ struct SettingsView: View {
                 }
                 Slider(value: $viewModel.temperature, in: 0...1, step: 0.05)
 
-                Stepper(value: $viewModel.maxTokens, in: 64...8192, step: 64) {
-                    Text("最大 Tokens：\(viewModel.maxTokens)")
-                }
+                TextField("最大 Tokens", value: $viewModel.maxTokens, formatter: numberFormatter)
+                    .keyboardType(.numberPad)
+                    .textInputAutocapitalization(.never)
 
                 Toggle("流式输出", isOn: $viewModel.stream)
             }

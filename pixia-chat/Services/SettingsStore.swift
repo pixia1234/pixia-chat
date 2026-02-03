@@ -59,7 +59,7 @@ final class SettingsStore: ObservableObject {
         apiMode = APIMode(rawValue: defaults.string(forKey: Keys.apiMode) ?? "responses") ?? .responses
         model = defaults.string(forKey: Keys.model) ?? "gpt-5.2"
         temperature = defaults.object(forKey: Keys.temperature) as? Double ?? 0.7
-        maxTokens = defaults.object(forKey: Keys.maxTokens) as? Int ?? 1024
+        maxTokens = defaults.object(forKey: Keys.maxTokens) as? Int ?? 256000
         stream = defaults.object(forKey: Keys.stream) as? Bool ?? true
         apiKey = KeychainService.shared.get("openai_api_key") ?? ""
     }
