@@ -12,5 +12,3 @@ extension Message {
     @NSManaged public var createdAt: Date
     @NSManaged public var session: ChatSession
 }
-
-extension Message: Identifiable {}

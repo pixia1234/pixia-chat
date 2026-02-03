@@ -32,9 +32,9 @@ struct ChatView: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
-                                ForEach(messages) { message in
+                                ForEach(messages, id: \.objectID) { message in
                                     ChatBubbleView(role: message.role, text: message.content)
-                                        .id(message.id)
+                                        .id(message.objectID)
                                 }
                                 if !viewModel.assistantDraft.isEmpty {
                                     ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
@@ -117,7 +117,7 @@ struct ChatView: View {
     private func scrollToBottom(proxy: ScrollViewProxy) {
         if let last = messages.last {
             withAnimation(.easeOut(duration: 0.22)) {
-                proxy.scrollTo(last.id, anchor: .bottom)
+                proxy.scrollTo(last.objectID, anchor: .bottom)
             }
         } else if !viewModel.assistantDraft.isEmpty {
             withAnimation(.easeOut(duration: 0.22)) {
