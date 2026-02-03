@@ -3,15 +3,18 @@ import CoreData
 import UIKit
 
 struct ChatView: View {
-    let session: ChatSession
+    @ObservedObject var session: ChatSession
     @ObservedObject var viewModel: ChatViewModel
 
     @FetchRequest private var messages: FetchedResults<Message>
     @State private var sendPulse = false
     @State private var wasAwaiting = false
+    @State private var isSessionDeleted = false
+    @Environment(\.managedObjectContext) private var context
+    @Environment(\.dismiss) private var dismiss
 
     init(session: ChatSession, viewModel: ChatViewModel) {
-        self.session = session
+        self._session = ObservedObject(wrappedValue: session)
         self.viewModel = viewModel
         _messages = FetchRequest<Message>(
             sortDescriptors: [NSSortDescriptor(keyPath: \Message.createdAt, ascending: true)],
@@ -21,64 +24,70 @@ struct ChatView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(messages) { message in
-                            ChatBubbleView(role: message.role, text: message.content)
-                                .id(message.id)
+        Group {
+            if isSessionDeleted || session.managedObjectContext == nil {
+                DeletedSessionView()
+            } else {
+                VStack(spacing: 0) {
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 0) {
+                                ForEach(messages) { message in
+                                    ChatBubbleView(role: message.role, text: message.content)
+                                        .id(message.id)
+                                }
+                                if !viewModel.assistantDraft.isEmpty {
+                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
+                                        .id("draft")
+                                }
+                                if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty {
+                                    TypingBubbleView()
+                                        .id("typing")
+                                }
+                            }
                         }
-                        if !viewModel.assistantDraft.isEmpty {
-                            ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
-                                .id("draft")
+                        .onChange(of: messages.count) { _ in
+                            scrollToBottom(proxy: proxy)
                         }
-                        if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty {
-                            TypingBubbleView()
-                                .id("typing")
+                        .onChange(of: viewModel.assistantDraft) { _ in
+                            scrollToBottom(proxy: proxy)
+                        }
+                        .onChange(of: viewModel.isAwaitingResponse) { _ in
+                            scrollToBottom(proxy: proxy)
                         }
                     }
-                }
-                .onChange(of: messages.count) { _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: viewModel.assistantDraft) { _ in
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: viewModel.isAwaitingResponse) { _ in
-                    scrollToBottom(proxy: proxy)
-                }
-            }
 
-            Divider()
+                    Divider()
 
-            VStack(spacing: 8) {
-                if viewModel.isAwaitingResponse {
-                    ThinkingBarView()
-                }
-
-                HStack(alignment: .bottom, spacing: 8) {
-                    inputField
-                        .scaleEffect(sendPulse ? 0.98 : 1.0)
-                        .animation(.spring(response: 0.22, dampingFraction: 0.7), value: sendPulse)
-
-                    if viewModel.isStreaming {
-                        Button("停止") {
-                            viewModel.stopStreaming(session: session)
-                            Haptics.light()
+                    VStack(spacing: 8) {
+                        if viewModel.isAwaitingResponse {
+                            ThinkingBarView()
                         }
-                        .buttonStyle(.bordered)
-                    } else {
-                        Button("发送") {
-                            triggerSendPulse()
-                            viewModel.send(session: session)
-                            Haptics.light()
+
+                        HStack(alignment: .bottom, spacing: 8) {
+                            inputField
+                                .scaleEffect(sendPulse ? 0.98 : 1.0)
+                                .animation(.spring(response: 0.22, dampingFraction: 0.7), value: sendPulse)
+
+                            if viewModel.isStreaming {
+                                Button("停止") {
+                                    viewModel.stopStreaming(session: session)
+                                    Haptics.light()
+                                }
+                                .buttonStyle(.bordered)
+                            } else {
+                                Button("发送") {
+                                    triggerSendPulse()
+                                    viewModel.send(session: session)
+                                    Haptics.light()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
                         }
-                        .buttonStyle(.borderedProminent)
                     }
+                    .padding()
                 }
             }
-            .padding()
         }
         .navigationTitle(session.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -87,6 +96,13 @@ struct ChatView: View {
             set: { _ in viewModel.errorMessage = nil }
         )) {
             Alert(title: Text("错误"), message: Text(viewModel.errorMessage ?? ""), dismissButton: .default(Text("确定")))
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange, object: context)) { note in
+            guard let deleted = note.userInfo?[NSDeletedObjectsKey] as? Set<NSManagedObject> else { return }
+            if deleted.contains(where: { $0.objectID == session.objectID }) {
+                isSessionDeleted = true
+                dismiss()
+            }
         }
         .onChange(of: viewModel.isAwaitingResponse) { isAwaiting in
             if wasAwaiting && !isAwaiting {
@@ -177,5 +193,19 @@ private struct ThinkingBarView: View {
             Spacer()
         }
         .padding(.horizontal, 6)
+    }
+}
+
+private struct DeletedSessionView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "trash")
+                .font(.system(size: 28))
+                .foregroundColor(.secondary)
+            Text("该对话已被删除")
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(UIColor.systemBackground))
     }
 }

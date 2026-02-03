@@ -22,7 +22,7 @@ final class OpenAIResponsesClient: LLMClient {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        try Self.validate(response)
+        try Self.validate(response, data: data)
 
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         return Self.extractOutputText(from: json) ?? ""
@@ -45,7 +45,13 @@ final class OpenAIResponsesClient: LLMClient {
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
                     let (bytes, response) = try await URLSession.shared.bytes(for: request)
-                    try Self.validate(response)
+                    if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                        var data = Data()
+                        for try await byte in bytes {
+                            data.append(byte)
+                        }
+                        throw Self.makeError(statusCode: http.statusCode, data: data)
+                    }
 
                     let parser = SSEParser()
                     for try await line in bytes.lines {
@@ -89,11 +95,31 @@ final class OpenAIResponsesClient: LLMClient {
         return baseURL.appendingPathComponent(cleanPath)
     }
 
-    private static func validate(_ response: URLResponse) throws {
+    private static func validate(_ response: URLResponse, data: Data) throws {
         guard let http = response as? HTTPURLResponse else { return }
         guard (200..<300).contains(http.statusCode) else {
-            throw NSError(domain: "HTTP", code: http.statusCode)
+            throw makeError(statusCode: http.statusCode, data: data)
         }
+    }
+
+    private static func makeError(statusCode: Int, data: Data) -> Error {
+        let message = parseErrorMessage(from: data) ?? "HTTP \(statusCode)"
+        return NSError(domain: "HTTP", code: statusCode, userInfo: [NSLocalizedDescriptionKey: message])
+    }
+
+    private static func parseErrorMessage(from data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let error = obj["error"] as? [String: Any] {
+            if let message = error["message"] as? String {
+                return message
+            }
+        }
+        if let message = obj["message"] as? String {
+            return message
+        }
+        return nil
     }
 
     private static func formatInput(messages: [ChatMessage]) -> [[String: Any]] {
