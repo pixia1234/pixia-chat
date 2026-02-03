@@ -20,6 +20,7 @@
 		ABDFDAE9B6174D5BA8D75A2F  = {isa = PBXBuildFile; fileRef = 05C1252FA3794DF4A0A33A00 ; };
 		088B8CE2843943668261DA14  = {isa = PBXBuildFile; fileRef = 1B13B0496A5B4CEAAE414968 ; };
 		B632ED66DC694FAB98122CF0  = {isa = PBXBuildFile; fileRef = 31CE572357FB414DB26A27C6 ; };
+		2539ECE3AF58491D81966D15  = {isa = PBXBuildFile; fileRef = DB18A906A123470F96161AEC ; };
 		F8899BD277D44ED88B05F86E  = {isa = PBXBuildFile; fileRef = AC5CD8674373461C8D1B9B71 ; };
 		B49FCBC83AC44C608CF2DC9D  = {isa = PBXBuildFile; fileRef = 63A6A2C2B6FF40DE9F02D992 ; };
 		E54D7191DB424F3DACCDAA33  = {isa = PBXBuildFile; fileRef = 82B9EDE0EF024853A9455D2D ; };
@@ -32,7 +33,6 @@
 
 		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
 		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
-		7CA1A2927F584DA2A0F2F91D  = {isa = PBXBuildFile; fileRef = 661A4F6D45F64D2CB8953E86 ; };
 
 
 
@@ -41,7 +41,6 @@
 		CE7C48B47F3247C18CCF36EC  = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		94BB5FE08CE24CB3BC1D61D8  = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 
-		07CE0A551DC343A298DB7FE9  = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PixiaChat.xcdatamodel; sourceTree = "<group>"; };
 
 		9085A8821D714A7CA0BC5FD4  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixiaChatApp.swift; sourceTree = "<group>"; };
 		ED9E2B0AB01247418A49D7EA  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -58,6 +57,7 @@
 
 		1B13B0496A5B4CEAAE414968  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		31CE572357FB414DB26A27C6  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+		DB18A906A123470F96161AEC  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataModel.swift; sourceTree = "<group>"; };
 
 		AC5CD8674373461C8D1B9B71  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
 		63A6A2C2B6FF40DE9F02D992  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIChatCompletionsClient.swift; sourceTree = "<group>"; };
@@ -141,6 +141,7 @@
 			children = (
 				1B13B0496A5B4CEAAE414968 ,
 				31CE572357FB414DB26A27C6 ,
+				DB18A906A123470F96161AEC ,
 			);
 			path = Stores;
 			sourceTree = "<group>";
@@ -189,7 +190,6 @@
 			children = (
 				94BB5FE08CE24CB3BC1D61D8 ,
 				CE7C48B47F3247C18CCF36EC ,
-				661A4F6D45F64D2CB8953E86 ,
 				E029B7A66619443C97B80FA7 ,
 			);
 			sourceTree = "<group>";
@@ -251,7 +251,6 @@
 			files = (
 				72E05804EE264D71B61E615A ,
 				B93C4018C1F646F2BF946836 ,
-				7CA1A2927F584DA2A0F2F91D ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,6 +274,7 @@
 				ABDFDAE9B6174D5BA8D75A2F ,
 				088B8CE2843943668261DA14 ,
 				B632ED66DC694FAB98122CF0 ,
+				2539ECE3AF58491D81966D15 ,
 				F8899BD277D44ED88B05F86E ,
 				B49FCBC83AC44C608CF2DC9D ,
 				E54D7191DB424F3DACCDAA33 ,
@@ -394,16 +394,6 @@
 
 
 
-		661A4F6D45F64D2CB8953E86  = {
-			isa = XCVersionGroup;
-			children = (
-				07CE0A551DC343A298DB7FE9 ,
-			);
-			currentVersion = 07CE0A551DC343A298DB7FE9 ;
-			path = PixiaChat.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
 
 
 	};

@@ -31,12 +31,6 @@ jobs:
           fi
           xcodebuild -version
 
-      - name: Ensure Core Data current version
-        run: |
-          python3 -c 'import plistlib, pathlib, sys; d=pathlib.Path("pixia-chat/PixiaChat.xcdatamodeld"); \
-          (d.is_dir() or (print(f"Missing {d}"), sys.exit(1))); \
-          (d/".xccurrentversion").write_bytes(plistlib.dumps({"_XCCurrentVersionName":"PixiaChat.xcdatamodel"}, fmt=plistlib.FMT_BINARY))'
-
       - name: Build (Simulator)
         run: |
           xcodebuild \
