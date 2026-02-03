@@ -35,16 +35,6 @@ struct ChatStore {
         if session.title == "新的对话" && role == ChatRole.user {
             session.title = previewTitle(from: content)
         }
-        if role == ChatRole.assistant {
-            let firstUserContent = session.messagesArray.first(where: { $0.role == ChatRole.user })?.content ?? ""
-            let preview = previewTitle(from: firstUserContent)
-            if session.title == "新的对话" || session.title == preview {
-                let summary = summaryTitle(from: session.messagesArray)
-                if !summary.isEmpty {
-                    session.title = summary
-                }
-            }
-        }
         DebugLogger.log("addMessage session=\(session.id.uuidString) role=\(role) chars=\(content.count)")
         saveContext()
         return message
@@ -79,25 +69,6 @@ struct ChatStore {
 
     private func previewTitle(from text: String) -> String {
         return truncateTitle(text, limit: 18)
-    }
-
-    private func summaryTitle(from messages: [Message]) -> String {
-        let userTexts = messages.compactMap { $0.role == ChatRole.user ? $0.content : nil }
-        guard let first = userTexts.first else { return "" }
-        var base = first
-        if base.count < 4, userTexts.count > 1 {
-            base = base + " " + userTexts[1]
-        }
-        base = firstClause(from: base)
-        return truncateTitle(base, limit: 18)
-    }
-
-    private func firstClause(from text: String) -> String {
-        let separators = CharacterSet(charactersIn: "\n。！？.!?")
-        if let range = text.rangeOfCharacter(from: separators) {
-            return String(text[..<range.lowerBound])
-        }
-        return text
     }
 
     private func truncateTitle(_ text: String, limit: Int) -> String {

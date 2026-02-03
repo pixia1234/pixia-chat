@@ -19,6 +19,7 @@ final class ChatViewModel: ObservableObject {
     private var streamDidEnd: Bool = false
     private var pendingFinishSession: ChatSession?
     private var pendingFinishToken: Int = 0
+    private var isGeneratingTitle: Bool = false
 
     init(context: NSManagedObjectContext, settings: SettingsStore) {
         self.context = context
@@ -153,6 +154,7 @@ final class ChatViewModel: ObservableObject {
         if !draft.isEmpty, isSessionValid(session) {
             let store = ChatStore(context: context)
             store.addMessage(to: session, role: ChatRole.assistant, content: draft)
+            maybeGenerateTitle(for: session)
         }
         DebugLogger.log("finishStreaming token=\(token) chars=\(draft.count)")
     }
@@ -223,5 +225,100 @@ final class ChatViewModel: ObservableObject {
         pendingCharacters.removeAll()
         enqueueTyping(text)
         return true
+    }
+
+    private func maybeGenerateTitle(for session: ChatSession) {
+        guard !isGeneratingTitle else { return }
+        guard isSessionValid(session) else { return }
+
+        let firstUser = session.messagesArray.first(where: { $0.role == ChatRole.user })?.content ?? ""
+        let preview = previewTitle(from: firstUser)
+        let currentTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard currentTitle == "新的对话" || currentTitle == preview else { return }
+        let allowedTitles = Set([currentTitle, "新的对话", preview])
+
+        let messages = session.messagesArray.filter { $0.role != ChatRole.system }
+        guard messages.contains(where: { $0.role == ChatRole.assistant }) else { return }
+
+        guard let url = URL(string: settings.baseURL) else { return }
+        let apiKey = settings.apiKey
+        guard !apiKey.isEmpty else { return }
+
+        isGeneratingTitle = true
+        let client: LLMClient = {
+            switch settings.apiMode {
+            case .chatCompletions:
+                return OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+            case .responses:
+                return OpenAIResponsesClient(baseURL: url, apiKey: apiKey)
+            }
+        }()
+
+        let summaryPrompt = buildSummaryPrompt(from: messages)
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.isGeneratingTitle = false }
+            do {
+                let title = try await client.send(
+                    messages: summaryPrompt,
+                    model: self.settings.model,
+                    temperature: 0.2,
+                    maxTokens: 32
+                )
+                let cleaned = self.cleanTitle(title)
+                guard !cleaned.isEmpty, self.isSessionValid(session) else { return }
+                let latestTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard allowedTitles.contains(latestTitle) else { return }
+                let store = ChatStore(context: self.context)
+                store.renameSession(session, title: cleaned)
+            } catch {
+                DebugLogger.log("title summary error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func buildSummaryPrompt(from messages: [Message]) -> [ChatMessage] {
+        let system = ChatMessage(
+            role: ChatRole.system,
+            content: "你是一个标题生成器。请根据对话内容生成简短标题（不超过16个字），只输出标题，不要引号或多余解释。"
+        )
+        let lines = messages.suffix(8).map { message -> String in
+            let roleName = message.role == ChatRole.user ? "用户" : "助手"
+            let compact = message.content
+                .replacingOccurrences(of: "\n", with: " ")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let clipped = compact.count > 200 ? String(compact.prefix(200)) + "..." : compact
+            return "\(roleName): \(clipped)"
+        }
+        let user = ChatMessage(role: ChatRole.user, content: lines.joined(separator: "\n"))
+        return [system, user]
+    }
+
+    private func previewTitle(from text: String) -> String {
+        truncateTitle(text, limit: 18)
+    }
+
+    private func truncateTitle(_ text: String, limit: Int) -> String {
+        let parts = text.split { $0.isWhitespace || $0.isNewline }
+        var cleaned = parts.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleaned.count > limit {
+            cleaned = String(cleaned.prefix(limit)) + "..."
+        }
+        return cleaned.isEmpty ? "新的对话" : cleaned
+    }
+
+    private func cleanTitle(_ text: String) -> String {
+        var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: "\"“”'"))
+        if let firstLine = cleaned.components(separatedBy: .newlines).first {
+            cleaned = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if cleaned.count > 18 {
+            cleaned = String(cleaned.prefix(18)) + "..."
+        }
+        if cleaned.isEmpty {
+            return ""
+        }
+        return cleaned
     }
 }
