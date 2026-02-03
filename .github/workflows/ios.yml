@@ -43,18 +43,27 @@ jobs:
       - name: Build (Device, unsigned)
         run: |
           set -euo pipefail
-          DERIVED_DATA="$PWD/build/DerivedData"
+          ARCHIVE_PATH="$PWD/build/PixiaChat.xcarchive"
           xcodebuild \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
             -sdk iphoneos \
             -configuration Release \
-            -derivedDataPath "$DERIVED_DATA" \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build
-          APP_PATH="$DERIVED_DATA/Build/Products/Release-iphoneos/PixiaChat.app"
+            CODE_SIGNING_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            SKIP_INSTALL=NO \
+            clean archive
+          APP_PATH="$ARCHIVE_PATH/Products/Applications/PixiaChat.app"
+          EXEC_NAME=$(/usr/libexec/PlistBuddy -c "Print CFBundleExecutable" "$APP_PATH/Info.plist")
+          if [ ! -f "$APP_PATH/$EXEC_NAME" ]; then
+            echo "Executable not found: $APP_PATH/$EXEC_NAME"
+            exit 1
+          fi
           mkdir -p build/unsigned/Payload
           cp -R "$APP_PATH" build/unsigned/Payload/
           (cd build/unsigned && /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$PWD/PixiaChat-unsigned.ipa")
