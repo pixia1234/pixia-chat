@@ -59,7 +59,6 @@ enum CoreDataModel {
         messagesRel.maxCount = 0
         messagesRel.deleteRule = .cascadeDeleteRule
         messagesRel.isOptional = true
-        messagesRel.isToMany = true
 
         let sessionRel = NSRelationshipDescription()
         sessionRel.name = "session"
@@ -68,7 +67,6 @@ enum CoreDataModel {
         sessionRel.maxCount = 1
         sessionRel.deleteRule = .nullifyDeleteRule
         sessionRel.isOptional = false
-        sessionRel.isToMany = false
 
         messagesRel.inverseRelationship = sessionRel
         sessionRel.inverseRelationship = messagesRel
