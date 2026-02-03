@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreData
+import UIKit
 
 struct ChatSplitView: View {
     @Environment(\.managedObjectContext) private var context
@@ -19,6 +20,7 @@ struct ChatSplitView: View {
     @State private var renameText: String = ""
     @State private var selectedSessionID: NSManagedObjectID?
     @State private var searchText: String = ""
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
 
     private var viewModel: ChatListViewModel {
         ChatListViewModel(context: context)
@@ -37,6 +39,13 @@ struct ChatSplitView: View {
                         placeholderView
                     }
                 }
+            } else if isPad {
+                LegacySplitView(
+                    primary: NavigationView { chatListLegacy }
+                        .navigationViewStyle(StackNavigationViewStyle()),
+                    secondary: NavigationView { legacyDetailView }
+                        .navigationViewStyle(StackNavigationViewStyle())
+                )
             } else {
                 NavigationView {
                     chatListiOS15
@@ -189,6 +198,71 @@ struct ChatSplitView: View {
         }
     }
 
+    private var chatListLegacy: some View {
+        List {
+            ForEach(filteredSessions, id: \.objectID) { session in
+                Button {
+                    selectedSessionID = session.objectID
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Text(session.title)
+                                .font(.headline)
+                                .lineLimit(1)
+                            if session.isPinned {
+                                Image(systemName: "pin.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                            Spacer()
+                            Text(relativeTime(from: session.updatedAt))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text(session.lastMessageText.isEmpty ? "暂无消息" : session.lastMessageText)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(
+                    (selectedSessionID == session.objectID) ? Color.accentColor.opacity(0.12) : Color.clear
+                )
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button(session.isPinned ? "取消置顶" : "置顶") {
+                        viewModel.togglePinned(session)
+                        Haptics.light()
+                    }
+                    .tint(.orange)
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button("重命名") {
+                        startRename(session)
+                    }
+                    .tint(.blue)
+                    Button(role: .destructive) {
+                        delete(session: session)
+                    } label: {
+                        Text("删除")
+                    }
+                }
+            }
+            .onDelete(perform: delete)
+        }
+        .listStyle(.sidebar)
+        .searchable(text: $searchText, prompt: "搜索对话")
+        .navigationTitle("对话")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: addSession) {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+    }
+
     private var placeholderView: some View {
         VStack(spacing: 12) {
             Image(systemName: "message")
@@ -196,6 +270,17 @@ struct ChatSplitView: View {
                 .foregroundColor(.secondary)
             Text(sessions.isEmpty ? "开始你的第一条对话" : "请选择一条对话")
                 .foregroundColor(.secondary)
+        }
+    }
+
+    private var legacyDetailView: some View {
+        Group {
+            if let session = selectedSession {
+                ChatView(session: session, context: context, settings: settings)
+                    .id(session.objectID)
+            } else {
+                placeholderView
+            }
         }
     }
 
