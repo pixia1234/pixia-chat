@@ -111,6 +111,7 @@
 				F0C6BBB019C94B1FA0184809 ,
 				B926525F49884EA789E1CF1B ,
 			);
+			path = "pixia-chat";
 			sourceTree = "<group>";
 		};
 
