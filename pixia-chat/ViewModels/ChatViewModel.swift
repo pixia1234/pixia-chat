@@ -30,7 +30,7 @@ final class ChatViewModel: ObservableObject {
         requestToken += 1
         let token = requestToken
         responseStartTime = Date()
-        DebugLogger.log("send start session=\(session.id.uuidString) token=\(token) stream=\(settings.stream)")
+        DebugLogger.log("send start session=\(session.objectID.uriRepresentation().absoluteString) token=\(token) stream=\(settings.stream)")
 
         let store = ChatStore(context: context)
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
@@ -130,7 +130,7 @@ final class ChatViewModel: ObservableObject {
     private func isSessionValid(_ session: ChatSession) -> Bool {
         let valid = session.managedObjectContext != nil && !session.isDeleted
         if !valid {
-            DebugLogger.log("session invalid id=\(session.id.uuidString) deleted=\(session.isDeleted)")
+            DebugLogger.log("session invalid id=\(session.objectID.uriRepresentation().absoluteString) deleted=\(session.isDeleted)")
         }
         return valid
     }

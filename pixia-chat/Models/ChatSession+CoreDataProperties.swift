@@ -14,7 +14,7 @@ extension ChatSession {
     @NSManaged public var messages: Set<Message>?
 }
 
-extension ChatSession: Identifiable {
+extension ChatSession {
     var messagesArray: [Message] {
         let set = messages ?? []
         return set.sorted { $0.createdAt < $1.createdAt }

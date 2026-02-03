@@ -25,7 +25,7 @@ struct ChatSplitView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(sessions) { session in
+                ForEach(sessions, id: \.objectID) { session in
                     NavigationLink(destination: ChatView(session: session, viewModel: ChatViewModel(context: context, settings: settings))) {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 6) {
