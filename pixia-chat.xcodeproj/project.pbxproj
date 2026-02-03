@@ -51,10 +51,10 @@
 		3339086E469A41AE8971DFE8 /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
 
 		FE70FCC9B189450E93CB088A /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
-		D8DACDA344AE4A6EA3E14223 /* ChatSession+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession+CoreDataClass.swift; sourceTree = "<group>"; };
-		77953CDE5AB0403089AF662E /* ChatSession+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession+CoreDataProperties.swift; sourceTree = "<group>"; };
-		0027FD175E874368B0CFFAB2 /* Message+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message+CoreDataClass.swift; sourceTree = "<group>"; };
-		05C1252FA3794DF4A0A33A00 /* Message+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message+CoreDataProperties.swift; sourceTree = "<group>"; };
+		D8DACDA344AE4A6EA3E14223 /* ChatSession+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
+		77953CDE5AB0403089AF662E /* ChatSession+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		0027FD175E874368B0CFFAB2 /* Message+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataClass.swift"; sourceTree = "<group>"; };
+		05C1252FA3794DF4A0A33A00 /* Message+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+CoreDataProperties.swift"; sourceTree = "<group>"; };
 
 		1B13B0496A5B4CEAAE414968 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		31CE572357FB414DB26A27C6 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
