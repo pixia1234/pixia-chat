@@ -40,6 +40,31 @@ jobs:
             -configuration Debug \
             build
 
+      - name: Build (Device, unsigned)
+        run: |
+          set -euo pipefail
+          DERIVED_DATA="$PWD/build/DerivedData"
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath "$DERIVED_DATA" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+          APP_PATH="$DERIVED_DATA/Build/Products/Release-iphoneos/PixiaChat.app"
+          mkdir -p build/unsigned/Payload
+          cp -R "$APP_PATH" build/unsigned/Payload/
+          (cd build/unsigned && /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$PWD/PixiaChat-unsigned.ipa")
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: PixiaChat-unsigned-ipa
+          path: build/unsigned/PixiaChat-unsigned.ipa
+
       - name: Install signing certificate
         if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
