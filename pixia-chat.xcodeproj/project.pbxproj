@@ -39,6 +39,10 @@
 
 		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
 		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
+		084ABA8F73754710A41E6A4B  = {isa = PBXBuildFile; fileRef = 5ADCA555B20647648190C4B4 ; };
+		C9FFD85C84974EF6A28D4AB3  = {isa = PBXBuildFile; fileRef = A229F598A79849E39307589A ; };
+		0BBE39CC549D43BBA0A751BF  = {isa = PBXBuildFile; fileRef = 7E73F98A277A49B796FAB2C5 ; };
+		53C50FA391F1432CB6925928  = {isa = PBXBuildFile; fileRef = AC009C05DE2740EDBED7A2CA ; };
 
 
 
@@ -46,6 +50,10 @@
 		E029B7A66619443C97B80FA7  = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CE7C48B47F3247C18CCF36EC  = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		94BB5FE08CE24CB3BC1D61D8  = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5ADCA555B20647648190C4B4  = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Resources/markdown/markdown-it.min.js"; sourceTree = "<group>"; };
+		A229F598A79849E39307589A  = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Resources/markdown/texmath.min.js"; sourceTree = "<group>"; };
+		7E73F98A277A49B796FAB2C5  = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Resources/markdown/katex.min.js"; sourceTree = "<group>"; };
+		AC009C05DE2740EDBED7A2CA  = {isa = PBXFileReference; lastKnownFileType = text.css; path = "Resources/markdown/katex.min.css"; sourceTree = "<group>"; };
 
 
 		9085A8821D714A7CA0BC5FD4  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixiaChatApp.swift; sourceTree = "<group>"; };
@@ -208,6 +216,10 @@
 			isa = PBXGroup;
 			children = (
 				94BB5FE08CE24CB3BC1D61D8 ,
+				5ADCA555B20647648190C4B4 ,
+				A229F598A79849E39307589A ,
+				7E73F98A277A49B796FAB2C5 ,
+				AC009C05DE2740EDBED7A2CA ,
 				CE7C48B47F3247C18CCF36EC ,
 				E029B7A66619443C97B80FA7 ,
 			);
@@ -270,6 +282,10 @@
 			files = (
 				72E05804EE264D71B61E615A ,
 				B93C4018C1F646F2BF946836 ,
+				084ABA8F73754710A41E6A4B ,
+				C9FFD85C84974EF6A28D4AB3 ,
+				0BBE39CC549D43BBA0A751BF ,
+				53C50FA391F1432CB6925928 ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

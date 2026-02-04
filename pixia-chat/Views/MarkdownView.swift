@@ -96,6 +96,10 @@ private struct MarkdownWebView: UIViewRepresentable {
     }
 
     private static func htmlTemplate(isDark: Bool) -> String {
+        let katexCSS = loadResource(name: "katex.min", ext: "css")
+        let markdownIt = loadResource(name: "markdown-it.min", ext: "js")
+        let texmath = loadResource(name: "texmath.min", ext: "js")
+        let katexJS = loadResource(name: "katex.min", ext: "js")
         let textColor = isDark ? "#F2F2F2" : "#1C1C1E"
         let codeBg = isDark ? "#1C1C1E" : "#F2F2F7"
         let border = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
@@ -106,8 +110,8 @@ private struct MarkdownWebView: UIViewRepresentable {
         <html>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
           <style>
+            \(katexCSS)
             :root {
               color-scheme: light dark;
             }
@@ -157,9 +161,9 @@ private struct MarkdownWebView: UIViewRepresentable {
         </head>
         <body>
           <div id="content"></div>
-          <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-          <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
-          <script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js"></script>
+          <script>\(katexJS)</script>
+          <script>\(markdownIt)</script>
+          <script>\(texmath)</script>
           <script>
             const md = window.markdownit({
               html: false,
@@ -197,5 +201,16 @@ private struct MarkdownWebView: UIViewRepresentable {
         </body>
         </html>
         """
+    }
+
+    private static func loadResource(name: String, ext: String) -> String {
+        let subdirs = ["Resources/markdown", "markdown", nil]
+        for subdir in subdirs {
+            let url = Bundle.main.url(forResource: name, withExtension: ext, subdirectory: subdir)
+            if let url, let data = try? Data(contentsOf: url), let text = String(data: data, encoding: .utf8) {
+                return text
+            }
+        }
+        return ""
     }
 }
