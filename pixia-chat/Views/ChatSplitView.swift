@@ -25,6 +25,29 @@ struct ChatSplitView: View {
     }
 
     var body: some View {
+        if #available(iOS 16.0, *) {
+            baseContent
+                .alert("重命名", isPresented: $showRename) {
+                    TextField("对话标题", text: $renameText)
+                    Button("取消", role: .cancel) {}
+                    Button("保存") {
+                        if let session = renamingSession {
+                            viewModel.renameSession(session, title: renameText)
+                            Haptics.light()
+                        }
+                    }
+                } message: {
+                    Text("给这条对话起个新名字")
+                }
+        } else {
+            baseContent
+                .sheet(isPresented: $showRename) {
+                    renameSheet
+                }
+        }
+    }
+
+    private var baseContent: some View {
         Group {
             if #available(iOS 16.0, *) {
                 NavigationSplitView(columnVisibility: .constant(.all)) {
@@ -44,9 +67,6 @@ struct ChatSplitView: View {
                 }
                 .navigationViewStyle(DoubleColumnNavigationViewStyle())
             }
-        }
-        .sheet(isPresented: $showRename) {
-            renameSheet
         }
         .onAppear {
             if selectedSessionID == nil, let first = filteredSessions.first {

@@ -24,6 +24,29 @@ struct ChatListView: View {
     }
 
     var body: some View {
+        if #available(iOS 16.0, *) {
+            contentView
+                .alert("重命名", isPresented: $showRename) {
+                    TextField("对话标题", text: $renameText)
+                    Button("取消", role: .cancel) {}
+                    Button("保存") {
+                        if let session = renamingSession {
+                            viewModel.renameSession(session, title: renameText)
+                            Haptics.light()
+                        }
+                    }
+                } message: {
+                    Text("给这条对话起个新名字")
+                }
+        } else {
+            contentView
+                .sheet(isPresented: $showRename) {
+                    renameSheet
+                }
+        }
+    }
+
+    private var contentView: some View {
         ZStack {
             List {
                 ForEach(filteredSessions, id: \.objectID) { session in
@@ -92,9 +115,6 @@ struct ChatListView: View {
                     Image(systemName: "plus")
                 }
             }
-        }
-        .sheet(isPresented: $showRename) {
-            renameSheet
         }
     }
 
