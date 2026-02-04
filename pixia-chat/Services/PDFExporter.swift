@@ -1,8 +1,20 @@
 import Foundation
 import UIKit
 
+struct ChatExportSession {
+    let id: UUID
+    let title: String
+    let createdAt: Date
+}
+
+struct ChatExportMessage {
+    let role: String
+    let content: String
+    let createdAt: Date
+}
+
 struct PDFExporter {
-    static func export(session: ChatSession, messages: [Message]) -> URL? {
+    static func export(session: ChatExportSession, messages: [ChatExportMessage]) -> Result<URL, String> {
         let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4
         let margin: CGFloat = 32
         let contentWidth = pageRect.width - margin * 2
@@ -83,10 +95,10 @@ struct PDFExporter {
                     y += bounding.height + 6
                 }
             })
-            return url
+            return .success(url)
         } catch {
             DebugLogger.log("pdf export error: \(error.localizedDescription)")
-            return nil
+            return .failure("导出失败")
         }
     }
 }

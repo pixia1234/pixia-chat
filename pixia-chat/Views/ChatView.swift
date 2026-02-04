@@ -29,6 +29,7 @@ struct ChatView: View {
             predicate: NSPredicate(format: "session == %@", session)
         )
         UITextView.appearance().backgroundColor = .clear
+        UITextView.appearance().textContainerInset = UIEdgeInsets(top: 4, left: 2, bottom: 4, right: 2)
     }
 
     var body: some View {
@@ -200,20 +201,20 @@ struct ChatView: View {
                     .lineLimit(1...6)
                     .padding(12)
             } else {
-                let minHeight: CGFloat = isPad ? 28 : 36
-                let maxHeight: CGFloat = isPad ? 110 : 140
+                let minHeight: CGFloat = isPad ? 24 : 32
+                let maxHeight: CGFloat = isPad ? 88 : 140
                 ZStack(alignment: .topLeading) {
                     if viewModel.inputText.isEmpty {
                         Text("输入消息...")
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
                     }
                     TextEditor(text: $viewModel.inputText)
                         .font(.body)
                         .frame(minHeight: minHeight, maxHeight: maxHeight)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
                 }
             }
         }
@@ -276,14 +277,24 @@ struct ChatView: View {
     }
 
     private func exportChat() {
-        let url = PDFExporter.export(session: session, messages: Array(messages))
-        guard let url else {
-            viewModel.errorMessage = "导出失败"
-            return
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        let sessionSnapshot = ChatExportSession(id: session.id, title: session.title, createdAt: session.createdAt)
+        let messageSnapshots = messages.map { message in
+            ChatExportMessage(role: message.role, content: message.content, createdAt: message.createdAt)
         }
-        shareItems = [url]
-        showShare = true
-        Haptics.light()
+        Task.detached(priority: .userInitiated) {
+            let result = PDFExporter.export(session: sessionSnapshot, messages: messageSnapshots)
+            await MainActor.run {
+                switch result {
+                case .success(let url):
+                    shareItems = [url]
+                    showShare = true
+                    Haptics.light()
+                case .failure(let message):
+                    viewModel.errorMessage = message
+                }
+            }
+        }
     }
 }
 
