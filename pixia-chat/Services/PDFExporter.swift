@@ -83,6 +83,7 @@ struct PDFExporter {
         }
     }
 
+    @MainActor
     private static func renderPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat) -> Data? {
         let formatter = webView.viewPrintFormatter()
         let renderer = UIPrintPageRenderer()
@@ -104,12 +105,11 @@ struct PDFExporter {
         return data.isEmpty ? nil : data
     }
 
+    @MainActor
     private static func createPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat) async -> Data? {
-        await MainActor.run {
-            webView.frame = CGRect(origin: .zero, size: pageRect.size)
-            webView.setNeedsLayout()
-            webView.layoutIfNeeded()
-        }
+        webView.frame = CGRect(origin: .zero, size: pageRect.size)
+        webView.setNeedsLayout()
+        webView.layoutIfNeeded()
         await waitForLayout(webView)
 
         if #available(iOS 14.0, *) {
@@ -129,9 +129,10 @@ struct PDFExporter {
                 return data
             }
         }
-        return await MainActor.run { renderPDFData(from: webView, pageRect: pageRect, margin: margin) }
+        return renderPDFData(from: webView, pageRect: pageRect, margin: margin)
     }
 
+    @MainActor
     private static func waitForLayout(_ webView: WKWebView) async {
         for _ in 0..<6 {
             if let height = await evaluateJS(webView, script: "document.body && document.body.scrollHeight || 0") as? Double,
@@ -143,6 +144,7 @@ struct PDFExporter {
         try? await Task.sleep(nanoseconds: 120_000_000)
     }
 
+    @MainActor
     private static func evaluateJS(_ webView: WKWebView, script: String) async -> Any? {
         await withCheckedContinuation { continuation in
             webView.evaluateJavaScript(script) { result, _ in
