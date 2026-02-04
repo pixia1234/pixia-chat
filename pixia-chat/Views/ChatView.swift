@@ -13,6 +13,8 @@ struct ChatView: View {
     @State private var showEdit = false
     @State private var editDraft = ""
     @State private var editingMessageID: NSManagedObjectID?
+    @State private var showShare = false
+    @State private var shareItems: [Any] = []
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
@@ -98,6 +100,15 @@ struct ChatView: View {
         }
         .navigationTitle(titleText)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    exportChat()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+        }
         .alert(isPresented: Binding(
             get: { viewModel.errorMessage != nil },
             set: { _ in viewModel.errorMessage = nil }
@@ -145,6 +156,9 @@ struct ChatView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showShare) {
+            ShareSheet(items: shareItems)
         }
     }
 
@@ -244,6 +258,17 @@ struct ChatView: View {
             return
         }
         viewModel.updateMessage(message, content: editDraft)
+    }
+
+    private func exportChat() {
+        let url = PDFExporter.export(session: session, messages: Array(messages))
+        guard let url else {
+            viewModel.errorMessage = "导出失败"
+            return
+        }
+        shareItems = [url]
+        showShare = true
+        Haptics.light()
     }
 }
 
