@@ -206,7 +206,7 @@ final class SettingsViewModel: ObservableObject {
 
             let message = ChatMessage(role: ChatRole.user, content: "请用推理回答：1+1=?")
             do {
-                _ = try await client.send(
+                let response = try await client.send(
                     messages: [message],
                     model: model,
                     temperature: temperature,
@@ -214,7 +214,11 @@ final class SettingsViewModel: ObservableObject {
                     options: LLMRequestOptions(reasoningEffort: .medium)
                 )
                 await MainActor.run {
-                    self.reasoningTestStatus = "推理测试成功"
+                    if let reasoning = response.reasoning, !reasoning.isEmpty {
+                        self.reasoningTestStatus = "推理测试成功"
+                    } else {
+                        self.reasoningTestStatus = "推理测试完成，但未返回思考内容"
+                    }
                     self.isTesting = false
                     Haptics.success()
                 }

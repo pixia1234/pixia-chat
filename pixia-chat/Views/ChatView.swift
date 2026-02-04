@@ -45,17 +45,17 @@ struct ChatView: View {
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
                                 ForEach(messages, id: \.objectID) { message in
-                                    ChatBubbleView(role: message.role, text: message.content, imageData: message.imageData)
+                                    ChatBubbleView(role: message.role, text: message.content, reasoning: message.reasoning, imageData: message.imageData)
                                         .id(message.objectID)
                                         .contextMenu {
                                             messageContextMenu(message)
                                         }
                                 }
-                                if !viewModel.assistantDraft.isEmpty {
-                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft, isDraft: true)
+                                if !viewModel.assistantDraft.isEmpty || !viewModel.assistantReasoningDraft.isEmpty {
+                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft, reasoning: viewModel.assistantReasoningDraft, isDraft: true)
                                         .id("draft")
                                 }
-                                if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty {
+                                if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty && viewModel.assistantReasoningDraft.isEmpty {
                                     TypingBubbleView()
                                         .id("typing")
                                 }
@@ -77,6 +77,9 @@ struct ChatView: View {
                             scrollToBottom(proxy: proxy)
                         }
                         .onChange(of: viewModel.assistantDraft) { _ in
+                            scrollToBottom(proxy: proxy)
+                        }
+                        .onChange(of: viewModel.assistantReasoningDraft) { _ in
                             scrollToBottom(proxy: proxy)
                         }
                         .onChange(of: viewModel.isAwaitingResponse) { _ in
@@ -225,7 +228,7 @@ struct ChatView: View {
             withAnimation(.easeOut(duration: 0.22)) {
                 proxy.scrollTo(last.objectID, anchor: .bottom)
             }
-        } else if !viewModel.assistantDraft.isEmpty {
+        } else if !viewModel.assistantDraft.isEmpty || !viewModel.assistantReasoningDraft.isEmpty {
             withAnimation(.easeOut(duration: 0.22)) {
                 proxy.scrollTo("draft", anchor: .bottom)
             }
@@ -328,7 +331,7 @@ struct ChatView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         let sessionSnapshot = ChatExportSession(id: session.id, title: session.title, createdAt: session.createdAt)
         let messageSnapshots = messages.map { message in
-            ChatExportMessage(role: message.role, content: message.content, createdAt: message.createdAt)
+            ChatExportMessage(role: message.role, content: message.content, reasoning: message.reasoning, createdAt: message.createdAt)
         }
         Task.detached(priority: .userInitiated) {
             let result = PDFExporter.export(session: sessionSnapshot, messages: messageSnapshots)

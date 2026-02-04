@@ -9,7 +9,7 @@ final class OpenAIChatCompletionsClient: LLMClient {
         self.apiKey = apiKey
     }
 
-    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> String {
+    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> LLMResponse {
         var request = makeRequest(path: "v1/chat/completions")
         var body: [String: Any] = [
             "model": model,
@@ -33,10 +33,12 @@ final class OpenAIChatCompletionsClient: LLMClient {
         }
         let choices = (json?["choices"] as? [[String: Any]]) ?? []
         let message = (choices.first?["message"] as? [String: Any]) ?? [:]
-        return (message["content"] as? String) ?? ""
+        let content = (message["content"] as? String) ?? ""
+        let reasoning = (message["reasoning_content"] as? String) ?? (message["reasoning"] as? String)
+        return LLMResponse(content: content, reasoning: reasoning?.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
-    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<String, Error> {
+    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -75,8 +77,13 @@ final class OpenAIChatCompletionsClient: LLMClient {
                                 continuation.finish(throwing: NSError(domain: "HTTP", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
                                 return
                             }
-                            if let token = Self.extractDeltaToken(from: event) {
-                                continuation.yield(token)
+                            if let delta = Self.extractDelta(from: event) {
+                                if let reasoning = delta.reasoning, !reasoning.isEmpty {
+                                    continuation.yield(.reasoning(reasoning))
+                                }
+                                if let content = delta.content, !content.isEmpty {
+                                    continuation.yield(.content(content))
+                                }
                             }
                         }
                     }
@@ -133,15 +140,19 @@ final class OpenAIChatCompletionsClient: LLMClient {
         return nil
     }
 
-    private static func extractDeltaToken(from jsonLine: String) -> String? {
+    private static func extractDelta(from jsonLine: String) -> (content: String?, reasoning: String?)? {
         guard let data = jsonLine.data(using: .utf8),
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let choices = obj["choices"] as? [[String: Any]],
-              let delta = choices.first?["delta"] as? [String: Any],
-              let token = delta["content"] as? String else {
+              let delta = choices.first?["delta"] as? [String: Any] else {
             return nil
         }
-        return token
+        let content = delta["content"] as? String
+        let reasoning = (delta["reasoning_content"] as? String) ?? (delta["reasoning"] as? String)
+        if content == nil && reasoning == nil {
+            return nil
+        }
+        return (content, reasoning)
     }
 
     private static func extractErrorMessage(from json: [String: Any]?) -> String? {

@@ -23,3 +23,13 @@ struct LLMRequestOptions {
 
     static let `default` = LLMRequestOptions(reasoningEffort: .off)
 }
+
+enum LLMStreamEvent {
+    case content(String)
+    case reasoning(String)
+}
+
+struct LLMResponse {
+    let content: String
+    let reasoning: String?
+}

@@ -5,6 +5,7 @@ import CoreData
 final class ChatViewModel: ObservableObject {
     @Published var inputText: String = ""
     @Published var assistantDraft: String = ""
+    @Published var assistantReasoningDraft: String = ""
     @Published var isStreaming: Bool = false
     @Published var isAwaitingResponse: Bool = false
     @Published var errorMessage: String?
@@ -108,14 +109,20 @@ final class ChatViewModel: ObservableObject {
 
         if settings.stream {
             assistantDraft = ""
+            assistantReasoningDraft = ""
             isStreaming = true
             streamTask?.cancel()
             streamTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    for try await token in client.stream(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options) {
+                    for try await event in client.stream(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options) {
                         if Task.isCancelled { break }
-                        self.appendStreamText(token)
+                        switch event {
+                        case .content(let text):
+                            self.appendStreamText(text)
+                        case .reasoning(let text):
+                            self.appendReasoningText(text)
+                        }
                     }
                     self.finishStreaming(session: session, token: token)
                 } catch {
@@ -130,10 +137,10 @@ final class ChatViewModel: ObservableObject {
             Task { [weak self] in
                 guard let self else { return }
                 do {
-                    let text = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options)
-                    if self.isSessionValid(session), !text.isEmpty {
+                    let response = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options)
+                    if self.isSessionValid(session), !response.content.isEmpty {
                         let store = ChatStore(context: self.context)
-                        store.addMessage(to: session, role: ChatRole.assistant, content: text)
+                        store.addMessage(to: session, role: ChatRole.assistant, content: response.content, reasoning: response.reasoning)
                         self.maybeGenerateTitle(for: session)
                     }
                 } catch {
@@ -156,25 +163,28 @@ final class ChatViewModel: ObservableObject {
         DebugLogger.log("cancelStreaming")
         streamTask?.cancel()
         assistantDraft = ""
+        assistantReasoningDraft = ""
         isStreaming = false
         isAwaitingResponse = false
         streamTask = nil
     }
 
     private func finishStreaming(session: ChatSession, token: Int) {
-        guard isStreaming || !assistantDraft.isEmpty else { return }
+        guard isStreaming || !assistantDraft.isEmpty || !assistantReasoningDraft.isEmpty else { return }
         finalizeStreaming(session: session, token: token)
     }
 
     private func finalizeStreaming(session: ChatSession, token: Int) {
         let draft = assistantDraft
+        let reasoning = assistantReasoningDraft
         assistantDraft = ""
+        assistantReasoningDraft = ""
         isStreaming = false
         endAwaiting(token: token)
         streamTask = nil
-        if !draft.isEmpty, isSessionValid(session) {
+        if (!draft.isEmpty || !reasoning.isEmpty), isSessionValid(session) {
             let store = ChatStore(context: context)
-            store.addMessage(to: session, role: ChatRole.assistant, content: draft)
+            store.addMessage(to: session, role: ChatRole.assistant, content: draft, reasoning: reasoning)
             maybeGenerateTitle(for: session)
         }
         DebugLogger.log("finishStreaming token=\(token) chars=\(draft.count)")
@@ -213,6 +223,11 @@ final class ChatViewModel: ObservableObject {
     private func appendStreamText(_ text: String) {
         guard !text.isEmpty else { return }
         assistantDraft.append(contentsOf: text)
+    }
+
+    private func appendReasoningText(_ text: String) {
+        guard !text.isEmpty else { return }
+        assistantReasoningDraft.append(contentsOf: text)
     }
 
     private func applyContextLimit(_ messages: [ChatMessage]) -> [ChatMessage] {
@@ -274,7 +289,7 @@ final class ChatViewModel: ObservableObject {
                     maxTokens: 32,
                     options: .default
                 )
-                let cleaned = self.cleanTitle(title)
+                let cleaned = self.cleanTitle(title.content)
                 guard !cleaned.isEmpty, self.isSessionValid(session) else { return }
                 let latestTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard allowedTitles.contains(latestTitle) else { return }

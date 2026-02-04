@@ -4,6 +4,7 @@ import UIKit
 struct ChatBubbleView: View {
     let role: String
     let text: String
+    var reasoning: String? = nil
     var imageData: Data? = nil
     var isDraft: Bool = false
 
@@ -79,6 +80,21 @@ struct ChatBubbleView: View {
                     .frame(maxWidth: 240)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
+            if let reasoning, !reasoning.isEmpty {
+                VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 4) {
+                    Text("思考")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(reasoning)
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(isRightAligned ? .trailing : .leading)
+                        .textSelection(.enabled)
+                }
+                .padding(8)
+                .background(Color.secondary.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
             if isAssistant && !isDraft {
                 if requiresWebView(text) {
                     MarkdownView(text: text)
@@ -137,7 +153,7 @@ struct ChatBubbleView: View {
 
     private func requiresWebView(_ text: String) -> Bool {
         if text.contains("```") { return true }
-        if text.contains("$$") || text.contains("\\(") || text.contains("\\[") { return true }
+        if text.contains("$$") || text.contains("\\(") || text.contains("\\[") || text.contains("\\begin{") { return true }
         if text.range(of: #"\$[^$\n]+\$"#, options: .regularExpression) != nil { return true }
         if text.contains("\n|") && text.contains("|") { return true }
         return false

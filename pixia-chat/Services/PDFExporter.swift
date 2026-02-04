@@ -10,6 +10,7 @@ struct ChatExportSession {
 struct ChatExportMessage {
     let role: String
     let content: String
+    let reasoning: String?
     let createdAt: Date
 }
 
@@ -74,6 +75,15 @@ struct PDFExporter {
                 .foregroundColor: UIColor.secondaryLabel,
                 .paragraphStyle: paragraphStyle
             ]))
+
+            if let reasoning = message.reasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !reasoning.isEmpty {
+                blocks.append(NSAttributedString(string: "\n思考：\(reasoning)\n", attributes: [
+                    .font: metaFont,
+                    .foregroundColor: UIColor.secondaryLabel,
+                    .paragraphStyle: paragraphStyle
+                ]))
+            }
 
             let content = message.content.trimmingCharacters(in: .whitespacesAndNewlines)
             blocks.append(NSAttributedString(string: "\n\(content)\n", attributes: [

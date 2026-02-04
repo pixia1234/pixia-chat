@@ -9,7 +9,7 @@ final class OpenAIResponsesClient: LLMClient {
         self.apiKey = apiKey
     }
 
-    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> String {
+    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> LLMResponse {
         var request = makeRequest(path: "v1/responses")
         var body: [String: Any] = [
             "model": model,
@@ -31,10 +31,12 @@ final class OpenAIResponsesClient: LLMClient {
         if let errorMessage = Self.extractErrorMessage(from: json) {
             throw NSError(domain: "HTTP", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
         }
-        return Self.extractOutputText(from: json) ?? ""
+        let content = Self.extractOutputText(from: json) ?? ""
+        let reasoning = Self.extractReasoningText(from: json)
+        return LLMResponse(content: content, reasoning: reasoning)
     }
 
-    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<String, Error> {
+    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -74,7 +76,10 @@ final class OpenAIResponsesClient: LLMClient {
                                 return
                             }
                             if let delta = Self.extractOutputDelta(from: event) {
-                                continuation.yield(delta)
+                                continuation.yield(.content(delta))
+                            }
+                            if let reasoning = Self.extractReasoningDelta(from: event) {
+                                continuation.yield(.reasoning(reasoning))
                             }
                             if Self.isTerminalEvent(jsonLine: event) {
                                 continuation.finish()
@@ -223,6 +228,31 @@ final class OpenAIResponsesClient: LLMClient {
         return nil
     }
 
+    private static func extractReasoningDelta(from jsonLine: String) -> String? {
+        guard let data = jsonLine.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let type = obj["type"] as? String {
+            switch type {
+            case "response.reasoning.delta", "response.reasoning_text.delta":
+                return (obj["delta"] as? String) ?? (obj["text"] as? String)
+            case "response.reasoning", "response.reasoning_text":
+                return obj["text"] as? String
+            default:
+                break
+            }
+        }
+        if let delta = obj["delta"] as? [String: Any],
+           let text = delta["reasoning"] as? String {
+            return text
+        }
+        if let reasoning = obj["reasoning"] as? String {
+            return reasoning
+        }
+        return nil
+    }
+
     private static func isTerminalEvent(jsonLine: String) -> Bool {
         guard let data = jsonLine.data(using: .utf8),
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -249,5 +279,32 @@ final class OpenAIResponsesClient: LLMClient {
             return nil
         }
         return extractErrorMessage(from: obj)
+    }
+
+    private static func extractReasoningText(from json: [String: Any]?) -> String? {
+        if let reasoning = json?["reasoning"] as? String, !reasoning.isEmpty {
+            return reasoning
+        }
+        if let output = json?["output"] as? [[String: Any]] {
+            var parts: [String] = []
+            for item in output {
+                if let type = item["type"] as? String, type.contains("reasoning") {
+                    if let summary = item["summary"] as? String {
+                        parts.append(summary)
+                    }
+                }
+                if let content = item["content"] as? [[String: Any]] {
+                    for contentItem in content {
+                        if let type = contentItem["type"] as? String, type.contains("reasoning"),
+                           let text = contentItem["text"] as? String {
+                            parts.append(text)
+                        }
+                    }
+                }
+            }
+            let joined = parts.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            return joined.isEmpty ? nil : joined
+        }
+        return nil
     }
 }

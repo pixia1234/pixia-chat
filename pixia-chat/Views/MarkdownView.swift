@@ -169,7 +169,7 @@ private struct MarkdownWebView: UIViewRepresentable {
               html: false,
               linkify: true,
               breaks: true
-            }).use(texmath, { engine: katex, delimiters: 'dollars' });
+            }).use(texmath, { engine: katex, delimiters: ['dollars', 'brackets', 'beg_end'] });
 
             function reportHeight() {
               const height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
