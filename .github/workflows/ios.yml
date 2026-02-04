@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-14
@@ -47,6 +50,7 @@ jobs:
           ARCHIVE_PATH="$PWD/build/PixiaChat.xcarchive"
           VERSION=$( /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" pixia-chat/Info.plist )
           TS=$(date -u +%Y%m%d-%H%M%S)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           xcodebuild \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
@@ -78,6 +82,13 @@ jobs:
         with:
           name: ${{ env.UNSIGNED_IPA_NAME }}
           path: build/unsigned/${{ env.UNSIGNED_IPA_NAME }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
+          files: build/unsigned/${{ env.UNSIGNED_IPA_NAME }}
 
       - name: Install signing certificate
         if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
