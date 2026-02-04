@@ -23,6 +23,8 @@ struct ChatView: View {
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+    private var inputMinHeight: CGFloat { isPad ? 28 : 40 }
+    private var inputMaxHeight: CGFloat { isPad ? 64 : 140 }
 
     init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {
         self._session = ObservedObject(wrappedValue: session)
@@ -123,6 +125,7 @@ struct ChatView: View {
                                 Image(systemName: "photo")
                             }
                             .buttonStyle(.bordered)
+                            .frame(height: inputMinHeight)
                             .disabled(viewModel.isStreaming)
 
                             inputField
@@ -135,6 +138,7 @@ struct ChatView: View {
                                     Haptics.light()
                                 }
                                 .buttonStyle(.bordered)
+                                .frame(height: inputMinHeight)
                             } else {
                                 Button("发送") {
                                     triggerSendPulse()
@@ -147,6 +151,7 @@ struct ChatView: View {
                                     Haptics.light()
                                 }
                                 .buttonStyle(.borderedProminent)
+                                .frame(height: inputMinHeight)
                             }
                         }
                     }
@@ -245,12 +250,13 @@ struct ChatView: View {
     private var inputField: some View {
         Group {
             if #available(iOS 16.0, *) {
+                let verticalPadding: CGFloat = isPad ? 6 : 10
                 TextField("输入消息...", text: $viewModel.inputText, axis: .vertical)
                     .lineLimit(1...6)
-                    .padding(12)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, verticalPadding)
+                    .frame(minHeight: inputMinHeight, maxHeight: inputMaxHeight, alignment: .top)
             } else {
-                let minHeight: CGFloat = isPad ? 20 : 32
-                let maxHeight: CGFloat = isPad ? 64 : 140
                 ZStack(alignment: .topLeading) {
                     if viewModel.inputText.isEmpty {
                         Text("输入消息...")
@@ -260,7 +266,7 @@ struct ChatView: View {
                     }
                     TextEditor(text: $viewModel.inputText)
                         .font(.body)
-                        .frame(minHeight: minHeight, maxHeight: maxHeight)
+                        .frame(minHeight: inputMinHeight, maxHeight: inputMaxHeight)
                         .padding(.horizontal, 2)
                         .padding(.vertical, 1)
                 }
