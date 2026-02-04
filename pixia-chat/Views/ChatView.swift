@@ -15,6 +15,8 @@ struct ChatView: View {
     @State private var editingMessageID: NSManagedObjectID?
     @State private var showShare = false
     @State private var shareItems: [Any] = []
+    @State private var isUserDragging = false
+    @State private var dragResetWorkItem: DispatchWorkItem?
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
@@ -56,6 +58,17 @@ struct ChatView: View {
                             }
                         }
                         .modifier(KeyboardDismissOnScroll())
+                        .simultaneousGesture(
+                            DragGesture().onChanged { _ in
+                                isUserDragging = true
+                                dragResetWorkItem?.cancel()
+                                let item = DispatchWorkItem {
+                                    isUserDragging = false
+                                }
+                                dragResetWorkItem = item
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: item)
+                            }
+                        )
                         .onChange(of: messages.count) { _ in
                             scrollToBottom(proxy: proxy)
                         }
@@ -164,6 +177,7 @@ struct ChatView: View {
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
+        if isUserDragging { return }
         if let last = messages.last {
             withAnimation(.easeOut(duration: 0.22)) {
                 proxy.scrollTo(last.objectID, anchor: .bottom)

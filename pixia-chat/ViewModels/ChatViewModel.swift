@@ -236,9 +236,11 @@ final class ChatViewModel: ObservableObject {
         typingTask = Task { [weak self] in
             guard let self else { return }
             while !self.pendingCharacters.isEmpty {
-                let ch = self.pendingCharacters.removeFirst()
-                self.assistantDraft.append(ch)
-                try? await Task.sleep(nanoseconds: 18_000_000)
+                let chunkSize = min(4, self.pendingCharacters.count)
+                let chunk = self.pendingCharacters.prefix(chunkSize)
+                self.pendingCharacters.removeFirst(chunkSize)
+                self.assistantDraft.append(contentsOf: chunk)
+                try? await Task.sleep(nanoseconds: 35_000_000)
             }
             self.typingTask = nil
             if self.streamDidEnd, let session = self.pendingFinishSession {
