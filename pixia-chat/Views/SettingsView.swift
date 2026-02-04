@@ -5,6 +5,13 @@ struct SettingsView: View {
     private let iconWidth: CGFloat = 20
     private let iconSpacing: CGFloat = 10
     @State private var debugStatus: String?
+    private var contextOptions: [Int] {
+        let base = [0, 4, 6, 8, 12, 20]
+        if base.contains(viewModel.contextLimit) {
+            return base
+        }
+        return (base + [viewModel.contextLimit]).sorted()
+    }
 
     var body: some View {
         Form {
@@ -103,6 +110,19 @@ struct SettingsView: View {
                     TextField("最大 Tokens", text: maxTokensTextBinding)
                         .keyboardType(.numberPad)
                         .textInputAutocapitalization(.never)
+                }
+
+                HStack(spacing: 10) {
+                    icon("tray.full", color: .blue)
+                    Text("上下文条数")
+                    Spacer()
+                    Picker("", selection: $viewModel.contextLimit) {
+                        ForEach(contextOptions, id: \.self) { value in
+                            Text(value == 0 ? "无限" : "\(value) 条")
+                                .tag(value)
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
 
                 HStack(spacing: 10) {

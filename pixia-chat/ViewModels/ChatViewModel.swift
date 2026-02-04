@@ -101,6 +101,7 @@ final class ChatViewModel: ObservableObject {
 
         let maxTokens = settings.maxTokens > 0 ? settings.maxTokens : nil
         let temperature = settings.temperature
+        let cappedMessages = applyContextLimit(requestMessages)
 
         if settings.stream {
             assistantDraft = ""
@@ -109,7 +110,7 @@ final class ChatViewModel: ObservableObject {
             streamTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    for try await token in client.stream(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
+                    for try await token in client.stream(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
                         if Task.isCancelled { break }
                         self.appendStreamText(token)
                     }
@@ -126,7 +127,7 @@ final class ChatViewModel: ObservableObject {
             Task { [weak self] in
                 guard let self else { return }
                 do {
-                    let text = try await client.send(messages: requestMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
+                    let text = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
                     if self.isSessionValid(session), !text.isEmpty {
                         let store = ChatStore(context: self.context)
                         store.addMessage(to: session, role: ChatRole.assistant, content: text)
@@ -209,6 +210,17 @@ final class ChatViewModel: ObservableObject {
     private func appendStreamText(_ text: String) {
         guard !text.isEmpty else { return }
         assistantDraft.append(contentsOf: text)
+    }
+
+    private func applyContextLimit(_ messages: [ChatMessage]) -> [ChatMessage] {
+        let limit = settings.contextLimit
+        guard limit > 0 else { return messages }
+        let systemMessages = messages.filter { $0.role == ChatRole.system }
+        let historyMessages = messages.filter { $0.role != ChatRole.system }
+        if historyMessages.count <= limit {
+            return systemMessages + historyMessages
+        }
+        return systemMessages + historyMessages.suffix(limit)
     }
 
     private func maybeGenerateTitle(for session: ChatSession) {

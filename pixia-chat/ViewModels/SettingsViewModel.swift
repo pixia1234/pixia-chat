@@ -26,6 +26,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var systemPrompt: String {
         didSet { store.systemPrompt = systemPrompt }
     }
+    @Published var contextLimit: Int {
+        didSet { store.contextLimit = contextLimit }
+    }
     @Published var isTesting: Bool = false
     @Published var testStatus: String?
 
@@ -41,6 +44,7 @@ final class SettingsViewModel: ObservableObject {
         self.maxTokens = store.maxTokens
         self.stream = store.stream
         self.systemPrompt = store.systemPrompt
+        self.contextLimit = store.contextLimit
     }
 
     func clearKey() {

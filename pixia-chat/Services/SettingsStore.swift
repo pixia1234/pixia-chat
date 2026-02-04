@@ -23,6 +23,7 @@ final class SettingsStore: ObservableObject {
         static let maxTokens = "max_tokens"
         static let stream = "stream"
         static let systemPrompt = "system_prompt"
+        static let contextLimit = "context_limit"
     }
 
     @Published var baseURL: String {
@@ -46,6 +47,9 @@ final class SettingsStore: ObservableObject {
     @Published var systemPrompt: String {
         didSet { UserDefaults.standard.set(systemPrompt, forKey: Keys.systemPrompt) }
     }
+    @Published var contextLimit: Int {
+        didSet { UserDefaults.standard.set(contextLimit, forKey: Keys.contextLimit) }
+    }
 
     @Published var apiKey: String {
         didSet {
@@ -66,6 +70,7 @@ final class SettingsStore: ObservableObject {
         maxTokens = defaults.object(forKey: Keys.maxTokens) as? Int ?? 256000
         stream = defaults.object(forKey: Keys.stream) as? Bool ?? true
         systemPrompt = defaults.string(forKey: Keys.systemPrompt) ?? "you are a helpful assistant"
+        contextLimit = defaults.object(forKey: Keys.contextLimit) as? Int ?? 6
         apiKey = KeychainService.shared.get("openai_api_key") ?? ""
     }
 }
