@@ -141,7 +141,14 @@ final class SettingsViewModel: ObservableObject {
                 }
             }()
 
-            let imageData = Self.sampleImageData()
+            guard let imageData = Self.sampleImageData() else {
+                await MainActor.run {
+                    self.imageTestStatus = "图片数据无效"
+                    self.isTesting = false
+                    Haptics.light()
+                }
+                return
+            }
             let image = ChatImage(data: imageData, mimeType: "image/png")
             let message = ChatMessage(role: ChatRole.user, content: "这张图的主要颜色是什么？", images: [image])
 
@@ -221,8 +228,8 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
-    private static func sampleImageData() -> Data {
+    private static func sampleImageData() -> Data? {
         let base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABBAEAi9tqWQAAAABJRU5ErkJggg=="
-        return Data(base64Encoded: base64) ?? Data()
+        return Data(base64Encoded: base64)
     }
 }
