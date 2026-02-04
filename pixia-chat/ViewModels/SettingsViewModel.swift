@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
@@ -149,7 +150,7 @@ final class SettingsViewModel: ObservableObject {
                 }
                 return
             }
-            let image = ChatImage(data: imageData, mimeType: "image/png")
+            let image = ChatImage(data: imageData, mimeType: "image/jpeg")
             let message = ChatMessage(role: ChatRole.user, content: "这张图的主要颜色是什么？", images: [image])
 
             do {
@@ -233,7 +234,14 @@ final class SettingsViewModel: ObservableObject {
     }
 
     private static func sampleImageData() -> Data? {
-        let base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABBAEAi9tqWQAAAABJRU5ErkJggg=="
-        return Data(base64Encoded: base64)
+        let size = CGSize(width: 64, height: 64)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            UIColor.systemBlue.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            UIColor.systemYellow.setFill()
+            context.fill(CGRect(x: 12, y: 12, width: 40, height: 40))
+        }
+        return image.jpegData(compressionQuality: 0.9)
     }
 }
