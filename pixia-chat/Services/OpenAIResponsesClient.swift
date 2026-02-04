@@ -157,7 +157,7 @@ final class OpenAIResponsesClient: LLMClient {
             for image in message.images {
                 content.append([
                     "type": "input_image",
-                    "image_url": image.dataURL
+                    "image_url": Self.normalizeImageURL(image.dataURL)
                 ])
             }
             return [
@@ -299,5 +299,14 @@ final class OpenAIResponsesClient: LLMClient {
             return joined.isEmpty ? nil : joined
         }
         return nil
+    }
+
+    private static func normalizeImageURL(_ value: String) -> String {
+        guard value.hasPrefix("data:"),
+              let commaIndex = value.firstIndex(of: ",") else {
+            return value
+        }
+        let base64 = String(value[value.index(after: commaIndex)...])
+        return base64.isEmpty ? value : base64
     }
 }
