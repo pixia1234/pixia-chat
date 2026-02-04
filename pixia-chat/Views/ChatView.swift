@@ -55,6 +55,7 @@ struct ChatView: View {
                                 }
                             }
                         }
+                        .modifier(KeyboardDismissOnScroll())
                         .onChange(of: messages.count) { _ in
                             scrollToBottom(proxy: proxy)
                         }
@@ -269,6 +270,18 @@ struct ChatView: View {
         shareItems = [url]
         showShare = true
         Haptics.light()
+    }
+}
+
+private struct KeyboardDismissOnScroll: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content.scrollDismissesKeyboard(.immediately)
+        } else {
+            content.simultaneousGesture(DragGesture().onChanged { _ in
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            })
+        }
     }
 }
 

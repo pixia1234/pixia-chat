@@ -131,10 +131,17 @@ final class OpenAIResponsesClient: LLMClient {
 
     private static func formatInput(messages: [ChatMessage]) -> [[String: Any]] {
         return messages.map { message in
-            [
+            let contentType: String
+            switch message.role {
+            case ChatRole.assistant:
+                contentType = "output_text"
+            default:
+                contentType = "input_text"
+            }
+            return [
                 "role": message.role,
                 "content": [
-                    ["type": "input_text", "text": message.content]
+                    ["type": contentType, "text": message.content]
                 ]
             ]
         }
