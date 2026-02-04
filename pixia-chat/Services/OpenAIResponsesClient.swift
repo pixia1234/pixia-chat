@@ -155,17 +155,10 @@ final class OpenAIResponsesClient: LLMClient {
                 content.append(["type": "input_text", "text": message.content])
             }
             for image in message.images {
-                if image.dataURL.hasPrefix("data:") {
-                    content.append([
-                        "type": "input_image",
-                        "image_url": ["url": image.dataURL]
-                    ])
-                } else {
-                    content.append([
-                        "type": "input_image",
-                        "image_url": image.dataURL
-                    ])
-                }
+                content.append([
+                    "type": "input_image",
+                    "image_url": image.dataURL
+                ])
             }
             return [
                 "role": message.role,
