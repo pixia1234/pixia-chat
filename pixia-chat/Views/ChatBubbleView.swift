@@ -153,6 +153,8 @@ struct ChatBubbleView: View {
 
     private func requiresWebView(_ text: String) -> Bool {
         if text.contains("```") { return true }
+        if text.contains("```math") { return true }
+        if text.contains("```latex") { return true }
         if text.contains("$$") || text.contains("\\(") || text.contains("\\[") || text.contains("\\begin{") { return true }
         if text.range(of: #"\$[^$\n]+\$"#, options: .regularExpression) != nil { return true }
         if text.contains("\n|") && text.contains("|") { return true }
