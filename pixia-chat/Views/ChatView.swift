@@ -249,13 +249,15 @@ struct ChatView: View {
 
     private var inputField: some View {
         Group {
+            let isEmpty = viewModel.inputText.isEmpty
             if #available(iOS 16.0, *) {
                 let verticalPadding: CGFloat = isPad ? 4 : 6
                 TextField("输入消息...", text: $viewModel.inputText, axis: .vertical)
                     .lineLimit(1...6)
                     .padding(.horizontal, 12)
                     .padding(.vertical, verticalPadding)
-                    .frame(minHeight: inputMinHeight, maxHeight: inputMaxHeight, alignment: .top)
+                    .frame(minHeight: inputMinHeight, maxHeight: isEmpty ? inputMinHeight : inputMaxHeight, alignment: .top)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
                 ZStack(alignment: .topLeading) {
                     if viewModel.inputText.isEmpty {
@@ -266,7 +268,7 @@ struct ChatView: View {
                     }
                     TextEditor(text: $viewModel.inputText)
                         .font(.body)
-                        .frame(minHeight: inputMinHeight, maxHeight: inputMaxHeight)
+                        .frame(minHeight: inputMinHeight, maxHeight: isEmpty ? inputMinHeight : inputMaxHeight)
                         .padding(.horizontal, 2)
                         .padding(.vertical, 1)
                 }
