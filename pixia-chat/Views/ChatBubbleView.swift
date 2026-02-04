@@ -21,27 +21,46 @@ struct ChatBubbleView: View {
     }
 
     private var isUser: Bool {
-        role == ChatRole.user || role == ChatRole.system
+        role == ChatRole.user
     }
 
     private var isAssistant: Bool {
         role == ChatRole.assistant
     }
 
+    private var isSystem: Bool {
+        role == ChatRole.system
+    }
+
     private var avatarView: some View {
         ZStack {
             Circle()
-                .fill(isUser ? Color.accentColor.opacity(0.2) : Color.green.opacity(0.2))
+                .fill(avatarColor.opacity(0.2))
                 .frame(width: 24, height: 24)
-            if isUser {
-                Text("我")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.accentColor)
-            } else {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.green)
-            }
+            avatarContent
+        }
+    }
+
+    private var avatarColor: Color {
+        if isUser { return .accentColor }
+        if isSystem { return .yellow }
+        return .green
+    }
+
+    @ViewBuilder
+    private var avatarContent: some View {
+        if isUser {
+            Text("我")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.accentColor)
+        } else if isSystem {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.yellow)
+        } else {
+            Image(systemName: "sparkles")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.green)
         }
     }
 
@@ -51,7 +70,7 @@ struct ChatBubbleView: View {
                 MarkdownView(text: text)
             } else {
                 Text(text)
-                    .foregroundColor(isUser ? .white : .primary)
+                    .foregroundColor(textColor)
                     .multilineTextAlignment(isUser ? .trailing : .leading)
                     .textSelection(.enabled)
             }
@@ -64,7 +83,7 @@ struct ChatBubbleView: View {
                 bottomLeft: isUser ? 18 : 8,
                 bottomRight: isUser ? 8 : 18
             )
-            .fill(isUser ? Color.accentColor.opacity(0.9) : Color.gray.opacity(0.18))
+            .fill(bubbleColor)
         )
         .overlay(
             ChatBubbleShape(
@@ -73,10 +92,27 @@ struct ChatBubbleView: View {
                 bottomLeft: isUser ? 18 : 8,
                 bottomRight: isUser ? 8 : 18
             )
-            .stroke(Color.black.opacity(0.06), lineWidth: 0.5)
+            .stroke(bubbleBorderColor, lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .frame(maxWidth: 520, alignment: isUser ? .trailing : .leading)
+    }
+
+    private var bubbleColor: Color {
+        if isUser { return Color.accentColor.opacity(0.9) }
+        if isSystem { return Color.yellow.opacity(0.25) }
+        return Color.gray.opacity(0.18)
+    }
+
+    private var bubbleBorderColor: Color {
+        if isSystem { return Color.yellow.opacity(0.5) }
+        return Color.black.opacity(0.06)
+    }
+
+    private var textColor: Color {
+        if isUser { return .white }
+        if isSystem { return .primary }
+        return .primary
     }
 }
 
