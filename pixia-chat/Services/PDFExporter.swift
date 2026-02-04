@@ -253,8 +253,15 @@ struct PDFExporter {
               margin-bottom: 6px;
             }
             h1, h2, h3, h4, h5, h6 {
-              margin: 0.4em 0 0.2em;
+              margin: 0.6em 0 0.3em;
+              font-weight: 700;
             }
+            h1 { font-size: 1.6em; }
+            h2 { font-size: 1.4em; }
+            h3 { font-size: 1.2em; font-weight: 600; }
+            h4 { font-size: 1.1em; font-weight: 600; }
+            h5 { font-size: 1.0em; font-weight: 600; }
+            h6 { font-size: 0.95em; font-weight: 600; color: rgba(28,28,30,0.75); }
             p, ul, ol {
               margin: 0.2em 0 0.5em;
             }

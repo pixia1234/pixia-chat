@@ -123,8 +123,15 @@ private struct MarkdownWebView: UIViewRepresentable {
               background: transparent;
             }
             h1, h2, h3, h4, h5, h6 {
-              margin: 0.4em 0 0.2em;
+              margin: 0.6em 0 0.3em;
+              font-weight: 700;
             }
+            h1 { font-size: 1.6em; }
+            h2 { font-size: 1.4em; }
+            h3 { font-size: 1.2em; font-weight: 600; }
+            h4 { font-size: 1.1em; font-weight: 600; }
+            h5 { font-size: 1.0em; font-weight: 600; }
+            h6 { font-size: 0.95em; font-weight: 600; color: var(--heading-muted, \(textColor)); }
             p, ul, ol {
               margin: 0.2em 0 0.5em;
             }
@@ -183,11 +190,13 @@ private struct MarkdownWebView: UIViewRepresentable {
               const code = isDark ? "#1C1C1E" : "#F2F2F7";
               const border = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
               const link = isDark ? "#7AB8FF" : "#2B7CFF";
+              const headingMuted = isDark ? "rgba(242,242,242,0.75)" : "rgba(28,28,30,0.75)";
               document.body.style.color = text;
               const style = document.documentElement.style;
               style.setProperty("--code-bg", code);
               style.setProperty("--border-color", border);
               style.setProperty("--link-color", link);
+              style.setProperty("--heading-muted", headingMuted);
             }
 
             function preprocessMath(text) {
