@@ -39,7 +39,13 @@ struct PDFExporter {
         dateFormatter.timeStyle = .short
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("PixiaChat-\(session.id.uuidString).pdf")
 
-        let payloads = buildMessagePayloads(messages: messages, formatter: dateFormatter)
+        let fileManager = FileManager.default
+        let tempDir = fileManager.temporaryDirectory.appendingPathComponent("PixiaChatExport-\(session.id.uuidString)", isDirectory: true)
+        let imagesDir = tempDir.appendingPathComponent("images", isDirectory: true)
+        try? fileManager.removeItem(at: tempDir)
+        try? fileManager.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+
+        let payloads = buildMessagePayloads(messages: messages, formatter: dateFormatter, imageDirectory: imagesDir)
         let html = htmlTemplate(
             title: session.title,
             createdAt: dateFormatter.string(from: session.createdAt),
@@ -61,7 +67,7 @@ struct PDFExporter {
         }
 
         await MainActor.run {
-            webView.loadHTMLString(html, baseURL: Bundle.main.bundleURL)
+            webView.loadHTMLString(html, baseURL: tempDir)
         }
 
         let ready = await coordinator.waitReady()
@@ -161,7 +167,7 @@ struct PDFExporter {
         }
     }
 
-    private static func buildMessagePayloads(messages: [ChatExportMessage], formatter: DateFormatter) -> [[String: Any]] {
+    private static func buildMessagePayloads(messages: [ChatExportMessage], formatter: DateFormatter, imageDirectory: URL) -> [[String: Any]] {
         return messages.map { message in
             let roleLabel: String
             switch message.role {
@@ -185,8 +191,13 @@ struct PDFExporter {
                 payload["reasoning"] = reasoning
             }
             if let imageData = message.imageData, !imageData.isEmpty {
-                payload["imageData"] = imageData.base64EncodedString()
-                payload["imageMimeType"] = message.imageMimeType ?? "image/jpeg"
+                let mime = message.imageMimeType ?? "image/jpeg"
+                let ext = mime.contains("png") ? "png" : "jpg"
+                let filename = "\(message.createdAt.timeIntervalSince1970)-\(UUID().uuidString).\(ext)"
+                let fileURL = imageDirectory.appendingPathComponent(filename)
+                try? imageData.write(to: fileURL, options: [.atomic])
+                payload["imagePath"] = "images/\(filename)"
+                payload["imageMimeType"] = mime
             }
             return payload
         }
@@ -341,9 +352,8 @@ struct PDFExporter {
                 html += '<div class="reasoning-body">' + md.render(preprocessMath(msg.reasoning)) + '</div>';
                 html += '</div>';
               }
-              if (msg.imageData) {
-                const mime = msg.imageMimeType || 'image/jpeg';
-                html += '<img class="attachment" src="data:' + mime + ';base64,' + msg.imageData + '" />';
+              if (msg.imagePath) {
+                html += '<img class="attachment" src="' + msg.imagePath + '" />';
               }
               html += '<div class="body">' + md.render(preprocessMath(msg.content || "")) + '</div>';
               html += '</div>';
