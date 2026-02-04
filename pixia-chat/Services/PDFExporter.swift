@@ -84,7 +84,10 @@ struct PDFExporter {
     }
 
     @MainActor
-    private static func renderPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat) -> Data? {
+    private static func renderPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat, contentHeight: CGFloat) -> Data? {
+        webView.frame = CGRect(origin: .zero, size: CGSize(width: pageRect.width, height: max(pageRect.height, contentHeight)))
+        webView.setNeedsLayout()
+        webView.layoutIfNeeded()
         let formatter = webView.viewPrintFormatter()
         let renderer = UIPrintPageRenderer()
         renderer.addPrintFormatter(formatter, startingAtPageAt: 0)
@@ -112,24 +115,29 @@ struct PDFExporter {
         webView.layoutIfNeeded()
         await waitForLayout(webView)
 
+        let contentHeightValue = await evaluateJS(webView, script: "document.body && document.body.scrollHeight || 0")
+        let contentHeight = CGFloat((contentHeightValue as? Double) ?? Double(pageRect.height))
+
         if #available(iOS 14.0, *) {
-            let config = WKPDFConfiguration()
-            config.rect = CGRect(origin: .zero, size: pageRect.size)
-            let data: Data? = await withCheckedContinuation { continuation in
-                webView.createPDF(configuration: config) { result in
-                    switch result {
-                    case .success(let data):
-                        continuation.resume(returning: data)
-                    case .failure:
-                        continuation.resume(returning: nil)
+            if contentHeight <= pageRect.height * 1.05 {
+                let config = WKPDFConfiguration()
+                config.rect = CGRect(origin: .zero, size: pageRect.size)
+                let data: Data? = await withCheckedContinuation { continuation in
+                    webView.createPDF(configuration: config) { result in
+                        switch result {
+                        case .success(let data):
+                            continuation.resume(returning: data)
+                        case .failure:
+                            continuation.resume(returning: nil)
+                        }
                     }
                 }
-            }
-            if let data, !data.isEmpty {
-                return data
+                if let data, !data.isEmpty {
+                    return data
+                }
             }
         }
-        return renderPDFData(from: webView, pageRect: pageRect, margin: margin)
+        return renderPDFData(from: webView, pageRect: pageRect, margin: margin, contentHeight: contentHeight)
     }
 
     @MainActor
