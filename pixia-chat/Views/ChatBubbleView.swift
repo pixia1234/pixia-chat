@@ -183,6 +183,7 @@ struct ChatBubbleView: View {
         if text.contains("```latex") { return true }
         if text.contains("$$") || text.contains("\\(") || text.contains("\\[") || text.contains("\\begin{") { return true }
         if text.range(of: #"\$[^$\n]+\$"#, options: .regularExpression) != nil { return true }
+        if text.range(of: #"(?m)^\s{0,3}#{1,6}\s+"#, options: .regularExpression) != nil { return true }
         if text.contains("\n|") && text.contains("|") { return true }
         return false
     }
