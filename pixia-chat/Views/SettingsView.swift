@@ -6,11 +6,14 @@ struct SettingsView: View {
     private let iconSpacing: CGFloat = 10
     @State private var debugStatus: String?
     private var contextOptions: [Int] {
-        let base = [0, 4, 6, 8, 12, 20]
+        let base = [4, 6, 8, 12, 20, 0]
         if base.contains(viewModel.contextLimit) {
             return base
         }
-        return (base + [viewModel.contextLimit]).sorted()
+        var values = base.filter { $0 != 0 }
+        values.append(viewModel.contextLimit)
+        values = Array(Set(values)).sorted()
+        return values + [0]
     }
 
     var body: some View {
