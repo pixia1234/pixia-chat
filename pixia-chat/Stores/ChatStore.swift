@@ -54,7 +54,7 @@ struct ChatStore {
     }
 
     @discardableResult
-    func addMessage(to session: ChatSession, role: String, content: String, reasoning: String? = nil, imageData: Data? = nil, imageMimeType: String? = nil) -> Message {
+    func addMessage(to session: ChatSession, role: String, content: String, reasoning: String? = nil, imageData: Data? = nil, imageMimeType: String? = nil, usageTotalTokens: Int? = nil) -> Message {
         let message = Message(context: context)
         message.id = UUID()
         message.role = role
@@ -62,6 +62,9 @@ struct ChatStore {
         message.imageData = imageData
         message.imageMimeType = imageMimeType
         message.reasoning = reasoning
+        if let usageTotalTokens {
+            message.usageTotalTokens = Int64(max(0, usageTotalTokens))
+        }
         message.createdAt = Date()
         message.session = session
         if let imageData {

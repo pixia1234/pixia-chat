@@ -12,6 +12,7 @@ extension Message {
     @NSManaged public var imageData: Data?
     @NSManaged public var imageMimeType: String?
     @NSManaged public var reasoning: String?
+    @NSManaged public var usageTotalTokens: Int64
     @NSManaged public var createdAt: Date
     @NSManaged public var session: ChatSession
 }

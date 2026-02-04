@@ -7,6 +7,8 @@ struct ChatBubbleView: View {
     var reasoning: String? = nil
     var imageData: Data? = nil
     var isDraft: Bool = false
+    var usageTotalTokens: Int? = nil
+    var showTokenUsage: Bool = false
     var contextMenuContent: (() -> AnyView)? = nil
     @State private var showImagePreview = false
     @State private var previewImage: UIImage?
@@ -123,6 +125,12 @@ struct ChatBubbleView: View {
                     .foregroundColor(textColor)
                     .multilineTextAlignment(isRightAligned ? .trailing : .leading)
                     .textSelection(.enabled)
+            }
+            if showTokenUsage, isAssistant, !isDraft,
+               let usageTotalTokens, usageTotalTokens > 0 {
+                Text("本次消耗 \(usageTotalTokens) tokens")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
         }
         .padding(12)

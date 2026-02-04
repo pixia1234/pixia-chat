@@ -33,6 +33,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var reasoningEffort: ReasoningEffort {
         didSet { store.reasoningEffort = reasoningEffort }
     }
+    @Published var showTokenUsage: Bool {
+        didSet { store.showTokenUsage = showTokenUsage }
+    }
     @Published var isTesting: Bool = false
     @Published var testStatus: String?
     @Published var imageTestStatus: String?
@@ -52,6 +55,7 @@ final class SettingsViewModel: ObservableObject {
         self.systemPrompt = store.systemPrompt
         self.contextLimit = store.contextLimit
         self.reasoningEffort = store.reasoningEffort
+        self.showTokenUsage = store.showTokenUsage
     }
 
     func clearKey() {

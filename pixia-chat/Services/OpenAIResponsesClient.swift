@@ -33,7 +33,8 @@ final class OpenAIResponsesClient: LLMClient {
         }
         let content = Self.extractOutputText(from: json) ?? ""
         let reasoning = Self.extractReasoningText(from: json)
-        return LLMResponse(content: content, reasoning: reasoning)
+        let usage = Self.extractUsage(from: json)
+        return LLMResponse(content: content, reasoning: reasoning, usage: usage)
     }
 
     func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<LLMStreamEvent, Error> {
@@ -80,6 +81,9 @@ final class OpenAIResponsesClient: LLMClient {
                             }
                             if let reasoning = Self.extractReasoningDelta(from: event) {
                                 continuation.yield(.reasoning(reasoning))
+                            }
+                            if let usage = Self.extractUsage(fromLine: event) {
+                                continuation.yield(.usage(usage))
                             }
                             if Self.isTerminalEvent(jsonLine: event) {
                                 continuation.finish()
@@ -297,6 +301,32 @@ final class OpenAIResponsesClient: LLMClient {
             }
             let joined = parts.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
             return joined.isEmpty ? nil : joined
+        }
+        return nil
+    }
+
+    private static func extractUsage(from json: [String: Any]?) -> LLMUsage? {
+        guard let usage = json?["usage"] as? [String: Any] else { return nil }
+        let prompt = usage["input_tokens"] as? Int ?? usage["prompt_tokens"] as? Int
+        let completion = usage["output_tokens"] as? Int ?? usage["completion_tokens"] as? Int
+        let total = usage["total_tokens"] as? Int
+        if prompt == nil && completion == nil && total == nil {
+            return nil
+        }
+        return LLMUsage(promptTokens: prompt, completionTokens: completion, totalTokens: total)
+    }
+
+    private static func extractUsage(fromLine jsonLine: String) -> LLMUsage? {
+        guard let data = jsonLine.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let usage = extractUsage(from: obj) {
+            return usage
+        }
+        if let response = obj["response"] as? [String: Any],
+           let usage = extractUsage(from: response) {
+            return usage
         }
         return nil
     }

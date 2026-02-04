@@ -178,6 +178,11 @@ struct SettingsView: View {
                 }
 
                 HStack(spacing: 10) {
+                    icon("sum", color: .green)
+                    Toggle("显示 Token 消耗", isOn: $viewModel.showTokenUsage)
+                }
+
+                HStack(spacing: 10) {
                     icon("bolt.horizontal", color: .orange)
                     Toggle("流式输出", isOn: $viewModel.stream)
                 }

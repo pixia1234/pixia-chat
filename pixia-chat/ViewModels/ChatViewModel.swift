@@ -16,6 +16,7 @@ final class ChatViewModel: ObservableObject {
     private var requestToken: Int = 0
     private var responseStartTime: Date?
     private var isGeneratingTitle: Bool = false
+    private var assistantUsage: LLMUsage?
 
     init(context: NSManagedObjectContext, settings: SettingsStore) {
         self.context = context
@@ -110,6 +111,7 @@ final class ChatViewModel: ObservableObject {
         if settings.stream {
             assistantDraft = ""
             assistantReasoningDraft = ""
+            assistantUsage = nil
             isStreaming = true
             streamTask?.cancel()
             streamTask = Task { [weak self] in
@@ -122,6 +124,8 @@ final class ChatViewModel: ObservableObject {
                             self.appendStreamText(text)
                         case .reasoning(let text):
                             self.appendReasoningText(text)
+                        case .usage(let usage):
+                            self.assistantUsage = usage
                         }
                     }
                     self.finishStreaming(session: session, token: token)
@@ -140,7 +144,7 @@ final class ChatViewModel: ObservableObject {
                     let response = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options)
                     if self.isSessionValid(session), !response.content.isEmpty {
                         let store = ChatStore(context: self.context)
-                        store.addMessage(to: session, role: ChatRole.assistant, content: response.content, reasoning: response.reasoning)
+                        store.addMessage(to: session, role: ChatRole.assistant, content: response.content, reasoning: response.reasoning, usageTotalTokens: response.usage?.total)
                         self.maybeGenerateTitle(for: session)
                     }
                 } catch {
@@ -164,6 +168,7 @@ final class ChatViewModel: ObservableObject {
         streamTask?.cancel()
         assistantDraft = ""
         assistantReasoningDraft = ""
+        assistantUsage = nil
         isStreaming = false
         isAwaitingResponse = false
         streamTask = nil
@@ -177,14 +182,16 @@ final class ChatViewModel: ObservableObject {
     private func finalizeStreaming(session: ChatSession, token: Int) {
         let draft = assistantDraft
         let reasoning = assistantReasoningDraft
+        let usageTotal = assistantUsage?.total
         assistantDraft = ""
         assistantReasoningDraft = ""
+        assistantUsage = nil
         isStreaming = false
         endAwaiting(token: token)
         streamTask = nil
         if (!draft.isEmpty || !reasoning.isEmpty), isSessionValid(session) {
             let store = ChatStore(context: context)
-            store.addMessage(to: session, role: ChatRole.assistant, content: draft, reasoning: reasoning)
+            store.addMessage(to: session, role: ChatRole.assistant, content: draft, reasoning: reasoning, usageTotalTokens: usageTotal)
             maybeGenerateTitle(for: session)
         }
         DebugLogger.log("finishStreaming token=\(token) chars=\(draft.count)")

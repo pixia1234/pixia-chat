@@ -25,6 +25,7 @@ final class SettingsStore: ObservableObject {
         static let systemPrompt = "system_prompt"
         static let contextLimit = "context_limit"
         static let reasoningEffort = "reasoning_effort"
+        static let showTokenUsage = "show_token_usage"
     }
 
     @Published var baseURL: String {
@@ -54,6 +55,9 @@ final class SettingsStore: ObservableObject {
     @Published var reasoningEffort: ReasoningEffort {
         didSet { UserDefaults.standard.set(reasoningEffort.rawValue, forKey: Keys.reasoningEffort) }
     }
+    @Published var showTokenUsage: Bool {
+        didSet { UserDefaults.standard.set(showTokenUsage, forKey: Keys.showTokenUsage) }
+    }
 
     @Published var apiKey: String {
         didSet {
@@ -76,6 +80,7 @@ final class SettingsStore: ObservableObject {
         systemPrompt = defaults.string(forKey: Keys.systemPrompt) ?? "you are a helpful assistant"
         contextLimit = defaults.object(forKey: Keys.contextLimit) as? Int ?? 6
         reasoningEffort = ReasoningEffort(rawValue: defaults.string(forKey: Keys.reasoningEffort) ?? "off") ?? .off
+        showTokenUsage = defaults.object(forKey: Keys.showTokenUsage) as? Bool ?? false
         apiKey = KeychainService.shared.get("openai_api_key") ?? ""
     }
 }

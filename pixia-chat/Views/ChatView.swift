@@ -5,6 +5,7 @@ import UIKit
 struct ChatView: View {
     @ObservedObject var session: ChatSession
     @StateObject private var viewModel: ChatViewModel
+    @ObservedObject private var settings: SettingsStore
 
     @FetchRequest private var messages: FetchedResults<Message>
     @State private var sendPulse = false
@@ -29,6 +30,7 @@ struct ChatView: View {
     init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {
         self._session = ObservedObject(wrappedValue: session)
         self._viewModel = StateObject(wrappedValue: ChatViewModel(context: context, settings: settings))
+        self._settings = ObservedObject(wrappedValue: settings)
         _messages = FetchRequest<Message>(
             sortDescriptors: [NSSortDescriptor(keyPath: \Message.createdAt, ascending: true)],
             predicate: NSPredicate(format: "session == %@", session)
@@ -53,12 +55,20 @@ struct ChatView: View {
                                         text: message.content,
                                         reasoning: message.reasoning,
                                         imageData: resolvedImageData,
+                                        usageTotalTokens: Int(message.usageTotalTokens),
+                                        showTokenUsage: settings.showTokenUsage,
                                         contextMenuContent: { AnyView(messageContextMenu(message)) }
                                     )
                                     .id(message.objectID)
                                 }
                                 if !viewModel.assistantDraft.isEmpty || !viewModel.assistantReasoningDraft.isEmpty {
-                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft, reasoning: viewModel.assistantReasoningDraft, isDraft: true)
+                                    ChatBubbleView(
+                                        role: ChatRole.assistant,
+                                        text: viewModel.assistantDraft,
+                                        reasoning: viewModel.assistantReasoningDraft,
+                                        isDraft: true,
+                                        showTokenUsage: settings.showTokenUsage
+                                    )
                                         .id("draft")
                                 }
                                 if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty && viewModel.assistantReasoningDraft.isEmpty {

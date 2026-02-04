@@ -69,6 +69,12 @@ enum CoreDataModel {
         messageReasoning.attributeType = .stringAttributeType
         messageReasoning.isOptional = true
 
+        let messageUsageTotal = NSAttributeDescription()
+        messageUsageTotal.name = "usageTotalTokens"
+        messageUsageTotal.attributeType = .integer64AttributeType
+        messageUsageTotal.isOptional = false
+        messageUsageTotal.defaultValue = 0
+
         let messageCreatedAt = NSAttributeDescription()
         messageCreatedAt.name = "createdAt"
         messageCreatedAt.attributeType = .dateAttributeType
@@ -94,7 +100,7 @@ enum CoreDataModel {
         sessionRel.inverseRelationship = messagesRel
 
         sessionEntity.properties = [sessionId, sessionTitle, sessionCreatedAt, sessionUpdatedAt, sessionPinned, messagesRel]
-        messageEntity.properties = [messageId, messageRole, messageContent, messageImageData, messageImageMimeType, messageReasoning, messageCreatedAt, sessionRel]
+        messageEntity.properties = [messageId, messageRole, messageContent, messageImageData, messageImageMimeType, messageReasoning, messageUsageTotal, messageCreatedAt, sessionRel]
 
         model.entities = [sessionEntity, messageEntity]
         return model

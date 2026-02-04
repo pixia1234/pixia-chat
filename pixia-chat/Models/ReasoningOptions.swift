@@ -27,9 +27,23 @@ struct LLMRequestOptions {
 enum LLMStreamEvent {
     case content(String)
     case reasoning(String)
+    case usage(LLMUsage)
+}
+
+struct LLMUsage {
+    let promptTokens: Int?
+    let completionTokens: Int?
+    let totalTokens: Int?
+
+    var total: Int? {
+        if let totalTokens { return totalTokens }
+        if let promptTokens, let completionTokens { return promptTokens + completionTokens }
+        return nil
+    }
 }
 
 struct LLMResponse {
     let content: String
     let reasoning: String?
+    let usage: LLMUsage?
 }
