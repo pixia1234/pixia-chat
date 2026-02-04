@@ -38,6 +38,8 @@
 		10998E817C014445ADF8E140  = {isa = PBXBuildFile; fileRef = 905A6953C44B4E09B80E87B6 ; };
 		0EC78462663C45FC918A226F  = {isa = PBXBuildFile; fileRef = 8AFB2EE3582743FABD54AF82 ; };
 		C5B4A3A2918076F5E4D3C2B1  = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C ; };
+		A1D2C3B4E5F60718293A4B5D  = {isa = PBXBuildFile; fileRef = F6A7C1D2E3F4456A7B8C9D0E ; };
+		C1D2E3F405162738495A6B7C  = {isa = PBXBuildFile; fileRef = B7C8D9E0F123456789ABCDEF ; };
 
 		72E05804EE264D71B61E615A  = {isa = PBXBuildFile; fileRef = 94BB5FE08CE24CB3BC1D61D8 ; };
 		B93C4018C1F646F2BF946836  = {isa = PBXBuildFile; fileRef = CE7C48B47F3247C18CCF36EC ; };
@@ -69,6 +71,8 @@
 		C1B7D18AB4E64DF7B7B7A111  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSplitView.swift; sourceTree = "<group>"; };
 		D2C8E29AC5F7428FA6A6B222  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingIndicatorView.swift; sourceTree = "<group>"; };
 		4F3B8A9A0A2A4D2F9D6D8B22  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSplitView.swift; sourceTree = "<group>"; };
+		F6A7C1D2E3F4456A7B8C9D0E  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasoningOptions.swift; sourceTree = "<group>"; };
+		B7C8D9E0F123456789ABCDEF  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 
 		FE70FCC9B189450E93CB088A  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		D8DACDA344AE4A6EA3E14223  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatSession+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -152,6 +156,7 @@
 			isa = PBXGroup;
 			children = (
 				FE70FCC9B189450E93CB088A ,
+				F6A7C1D2E3F4456A7B8C9D0E ,
 				D8DACDA344AE4A6EA3E14223 ,
 				77953CDE5AB0403089AF662E ,
 				0027FD175E874368B0CFFAB2 ,
@@ -208,6 +213,7 @@
 				BE052899F08A49699493A588 ,
 				8788F0BDDE4E437DA035B3F7 ,
 				3339086E469A41AE8971DFE8 ,
+				B7C8D9E0F123456789ABCDEF ,
 				A1B2C3D4E5F60718293A4B5C ,
 				8AFB2EE3582743FABD54AF82 ,
 				C1B7D18AB4E64DF7B7B7A111 ,
@@ -332,6 +338,8 @@
 				10998E817C014445ADF8E140 ,
 				0EC78462663C45FC918A226F ,
 				C5B4A3A2918076F5E4D3C2B1 ,
+				A1D2C3B4E5F60718293A4B5D ,
+				C1D2E3F405162738495A6B7C ,
 				7C3B7E1B1F1B4E9D9E6A4C44 ,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -23,7 +23,7 @@ final class ChatViewModel: ObservableObject {
 
     @discardableResult
     func send(session: ChatSession, image: ChatImage? = nil) -> Bool {
-        guard isSessionValid(session) else { return }
+        guard isSessionValid(session) else { return false }
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty || image != nil else { return false }
         inputText = ""
