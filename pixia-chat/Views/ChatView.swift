@@ -10,6 +10,9 @@ struct ChatView: View {
     @State private var sendPulse = false
     @State private var wasAwaiting = false
     @State private var isSessionDeleted = false
+    @State private var showEdit = false
+    @State private var editDraft = ""
+    @State private var editingMessageID: NSManagedObjectID?
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
 
@@ -35,6 +38,9 @@ struct ChatView: View {
                                 ForEach(messages, id: \.objectID) { message in
                                     ChatBubbleView(role: message.role, text: message.content)
                                         .id(message.objectID)
+                                        .contextMenu {
+                                            messageContextMenu(message)
+                                        }
                                 }
                                 if !viewModel.assistantDraft.isEmpty {
                                     ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
@@ -112,6 +118,33 @@ struct ChatView: View {
             }
             wasAwaiting = isAwaiting
         }
+        .sheet(isPresented: $showEdit) {
+            NavigationView {
+                VStack(spacing: 12) {
+                    TextEditor(text: $editDraft)
+                        .padding(12)
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    Spacer()
+                }
+                .navigationTitle("编辑消息")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("取消") {
+                            showEdit = false
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("保存") {
+                            saveEdit()
+                            showEdit = false
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -172,6 +205,40 @@ struct ChatView: View {
             return "对话已删除"
         }
         return session.title
+    }
+
+    private func messageContextMenu(_ message: Message) -> some View {
+        Group {
+            if message.role != ChatRole.system {
+                Button("编辑") {
+                    startEdit(message)
+                }
+                Button(role: .destructive) {
+                    viewModel.deleteMessage(message)
+                    Haptics.light()
+                } label: {
+                    Text("删除")
+                }
+                Button("重新生成") {
+                    viewModel.regenerate(session: session, from: message)
+                    Haptics.light()
+                }
+            }
+        }
+    }
+
+    private func startEdit(_ message: Message) {
+        editingMessageID = message.objectID
+        editDraft = message.content
+        showEdit = true
+    }
+
+    private func saveEdit() {
+        guard let editingMessageID,
+              let message = try? context.existingObject(with: editingMessageID) as? Message else {
+            return
+        }
+        viewModel.updateMessage(message, content: editDraft)
     }
 }
 

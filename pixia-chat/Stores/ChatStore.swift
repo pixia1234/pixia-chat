@@ -23,6 +23,30 @@ struct ChatStore {
         saveContext()
     }
 
+    func deleteMessage(_ message: Message) {
+        DebugLogger.log("deleteMessage id=\(message.id.uuidString) role=\(message.role)")
+        context.delete(message)
+        saveContext()
+    }
+
+    func deleteMessages(_ messages: [Message]) {
+        guard !messages.isEmpty else { return }
+        for message in messages {
+            context.delete(message)
+        }
+        DebugLogger.log("deleteMessages count=\(messages.count)")
+        saveContext()
+    }
+
+    func updateMessage(_ message: Message, content: String) {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        message.content = trimmed
+        message.session.updatedAt = Date()
+        DebugLogger.log("updateMessage id=\(message.id.uuidString) role=\(message.role) chars=\(trimmed.count)")
+        saveContext()
+    }
+
     @discardableResult
     func addMessage(to session: ChatSession, role: String, content: String) -> Message {
         let message = Message(context: context)

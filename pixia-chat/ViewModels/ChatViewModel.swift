@@ -31,12 +31,6 @@ final class ChatViewModel: ObservableObject {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         inputText = ""
-        errorMessage = nil
-        isAwaitingResponse = true
-        requestToken += 1
-        let token = requestToken
-        responseStartTime = Date()
-        DebugLogger.log("send start session=\(session.objectID.uriRepresentation().absoluteString) token=\(token) stream=\(settings.stream)")
 
         let store = ChatStore(context: context)
         let systemPrompt = settings.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -46,6 +40,47 @@ final class ChatViewModel: ObservableObject {
         store.addMessage(to: session, role: ChatRole.user, content: trimmed)
 
         let requestMessages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
+        performRequest(session: session, requestMessages: requestMessages, label: "send")
+    }
+
+    func regenerate(session: ChatSession, from message: Message) {
+        guard isSessionValid(session) else { return }
+        guard message.role != ChatRole.system else { return }
+        cancelStreaming()
+
+        let messages = session.messagesArray
+        guard let index = messages.firstIndex(where: { $0.objectID == message.objectID }) else { return }
+
+        let keepCount = (message.role == ChatRole.assistant) ? index : min(index + 1, messages.count)
+        let toDelete = Array(messages.dropFirst(keepCount))
+        let store = ChatStore(context: context)
+        store.deleteMessages(toDelete)
+
+        let requestMessages = session.messagesArray
+            .filter { $0.role != ChatRole.system }
+            .map { ChatMessage(role: $0.role, content: $0.content) }
+        guard let last = requestMessages.last, last.role == ChatRole.user else { return }
+        performRequest(session: session, requestMessages: session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }, label: "regenerate")
+    }
+
+    func updateMessage(_ message: Message, content: String) {
+        let store = ChatStore(context: context)
+        store.updateMessage(message, content: content)
+    }
+
+    func deleteMessage(_ message: Message) {
+        cancelStreaming()
+        let store = ChatStore(context: context)
+        store.deleteMessage(message)
+    }
+
+    private func performRequest(session: ChatSession, requestMessages: [ChatMessage], label: String) {
+        errorMessage = nil
+        isAwaitingResponse = true
+        requestToken += 1
+        let token = requestToken
+        responseStartTime = Date()
+        DebugLogger.log("\(label) start session=\(session.objectID.uriRepresentation().absoluteString) token=\(token) stream=\(settings.stream)")
 
         guard let url = URL(string: settings.baseURL) else {
             errorMessage = "Base URL 无效"
