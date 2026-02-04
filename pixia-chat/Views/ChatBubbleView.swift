@@ -7,15 +7,15 @@ struct ChatBubbleView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
-            if !isUser {
+            if !isRightAligned {
                 avatarView
             }
             bubbleView
-            if isUser {
+            if isRightAligned {
                 avatarView
             }
         }
-        .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+        .frame(maxWidth: .infinity, alignment: isRightAligned ? .trailing : .leading)
         .padding(.horizontal)
         .padding(.vertical, 6)
     }
@@ -30,6 +30,10 @@ struct ChatBubbleView: View {
 
     private var isSystem: Bool {
         role == ChatRole.system
+    }
+
+    private var isRightAligned: Bool {
+        isUser || isSystem
     }
 
     private var avatarView: some View {
@@ -65,37 +69,37 @@ struct ChatBubbleView: View {
     }
 
     private var bubbleView: some View {
-        VStack(alignment: isUser ? .trailing : .leading, spacing: 8) {
+        VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 8) {
             if isAssistant && !isDraft {
                 MarkdownView(text: text)
             } else {
                 Text(text)
                     .foregroundColor(textColor)
-                    .multilineTextAlignment(isUser ? .trailing : .leading)
+                    .multilineTextAlignment(isRightAligned ? .trailing : .leading)
                     .textSelection(.enabled)
             }
         }
         .padding(12)
         .background(
             ChatBubbleShape(
-                topLeft: isUser ? 18 : 8,
-                topRight: isUser ? 8 : 18,
-                bottomLeft: isUser ? 18 : 8,
-                bottomRight: isUser ? 8 : 18
+                topLeft: isRightAligned ? 18 : 8,
+                topRight: isRightAligned ? 8 : 18,
+                bottomLeft: isRightAligned ? 18 : 8,
+                bottomRight: isRightAligned ? 8 : 18
             )
             .fill(bubbleColor)
         )
         .overlay(
             ChatBubbleShape(
-                topLeft: isUser ? 18 : 8,
-                topRight: isUser ? 8 : 18,
-                bottomLeft: isUser ? 18 : 8,
-                bottomRight: isUser ? 8 : 18
+                topLeft: isRightAligned ? 18 : 8,
+                topRight: isRightAligned ? 8 : 18,
+                bottomLeft: isRightAligned ? 18 : 8,
+                bottomRight: isRightAligned ? 8 : 18
             )
             .stroke(bubbleBorderColor, lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        .frame(maxWidth: 520, alignment: isUser ? .trailing : .leading)
+        .frame(maxWidth: 520, alignment: isRightAligned ? .trailing : .leading)
     }
 
     private var bubbleColor: Color {
