@@ -23,8 +23,8 @@ struct ChatView: View {
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var inputMinHeight: CGFloat { isPad ? 28 : 40 }
-    private var inputMaxHeight: CGFloat { isPad ? 64 : 140 }
+    private var inputMinHeight: CGFloat { isPad ? 24 : 32 }
+    private var inputMaxHeight: CGFloat { isPad ? 56 : 120 }
 
     init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {
         self._session = ObservedObject(wrappedValue: session)
@@ -250,7 +250,7 @@ struct ChatView: View {
     private var inputField: some View {
         Group {
             if #available(iOS 16.0, *) {
-                let verticalPadding: CGFloat = isPad ? 6 : 10
+                let verticalPadding: CGFloat = isPad ? 4 : 6
                 TextField("输入消息...", text: $viewModel.inputText, axis: .vertical)
                     .lineLimit(1...6)
                     .padding(.horizontal, 12)
@@ -262,7 +262,7 @@ struct ChatView: View {
                         Text("输入消息...")
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
+                            .padding(.vertical, 1)
                     }
                     TextEditor(text: $viewModel.inputText)
                         .font(.body)
