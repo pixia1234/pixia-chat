@@ -13,8 +13,7 @@ struct ChatView: View {
     @State private var showEdit = false
     @State private var editDraft = ""
     @State private var editingMessageID: NSManagedObjectID?
-    @State private var showShare = false
-    @State private var shareItems: [Any] = []
+    @State private var sharePayload: SharePayload?
     @State private var isUserDragging = false
     @State private var dragResetWorkItem: DispatchWorkItem?
     @Environment(\.managedObjectContext) private var context
@@ -172,8 +171,8 @@ struct ChatView: View {
                 }
             }
         }
-        .sheet(isPresented: $showShare) {
-            ShareSheet(items: shareItems)
+        .sheet(item: $sharePayload) { payload in
+            ShareSheet(items: payload.items)
         }
     }
 
@@ -287,8 +286,7 @@ struct ChatView: View {
             await MainActor.run {
                 switch result {
                 case .success(let url):
-                    shareItems = [url]
-                    showShare = true
+                    sharePayload = SharePayload(items: [url])
                     Haptics.light()
                 case .failure(let error):
                     viewModel.errorMessage = error.message
@@ -296,6 +294,11 @@ struct ChatView: View {
             }
         }
     }
+}
+
+private struct SharePayload: Identifiable {
+    let id = UUID()
+    let items: [Any]
 }
 
 private struct KeyboardDismissOnScroll: ViewModifier {
