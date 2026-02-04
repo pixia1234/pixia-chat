@@ -64,6 +64,42 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundColor(status.contains("成功") ? .green : .secondary)
                 }
+
+                Button(action: { viewModel.testImageSupport() }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "photo")
+                            .foregroundColor(.blue)
+                        if viewModel.isTesting {
+                            ProgressView()
+                        }
+                        Text("测试图片支持")
+                    }
+                }
+                .disabled(viewModel.isTesting)
+
+                if let status = viewModel.imageTestStatus {
+                    Text(status)
+                        .font(.footnote)
+                        .foregroundColor(status.contains("成功") ? .green : .secondary)
+                }
+
+                Button(action: { viewModel.testReasoningSupport() }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "brain.head.profile")
+                            .foregroundColor(.purple)
+                        if viewModel.isTesting {
+                            ProgressView()
+                        }
+                        Text("测试推理支持")
+                    }
+                }
+                .disabled(viewModel.isTesting)
+
+                if let status = viewModel.reasoningTestStatus {
+                    Text(status)
+                        .font(.footnote)
+                        .foregroundColor(status.contains("成功") ? .green : .secondary)
+                }
             }
 
             Section(header: Text("参数调节")) {
@@ -104,6 +140,19 @@ struct SettingsView: View {
                 Slider(value: $viewModel.temperature, in: 0...1, step: 0.05)
                     .tint(.cyan)
                     .padding(.leading, iconWidth + iconSpacing)
+
+                HStack(spacing: 10) {
+                    icon("brain.head.profile", color: .purple)
+                    Text("推理强度")
+                    Spacer()
+                    Picker("", selection: $viewModel.reasoningEffort) {
+                        ForEach(ReasoningEffort.allCases) { effort in
+                            Text(effort.title)
+                                .tag(effort)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
 
                 HStack(spacing: 10) {
                     icon("number", color: .indigo)

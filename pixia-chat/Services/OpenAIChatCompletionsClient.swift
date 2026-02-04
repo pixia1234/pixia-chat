@@ -9,15 +9,18 @@ final class OpenAIChatCompletionsClient: LLMClient {
         self.apiKey = apiKey
     }
 
-    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?) async throws -> String {
+    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> String {
         var request = makeRequest(path: "v1/chat/completions")
         var body: [String: Any] = [
             "model": model,
-            "messages": messages.map { ["role": $0.role, "content": $0.content] },
+            "messages": messages.map { Self.formatMessage($0) },
             "temperature": temperature
         ]
         if let maxTokens = maxTokens {
             body["max_tokens"] = maxTokens
+        }
+        if options.reasoningEffort != .off {
+            body["reasoning"] = ["effort": options.reasoningEffort.rawValue]
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -33,7 +36,7 @@ final class OpenAIChatCompletionsClient: LLMClient {
         return (message["content"] as? String) ?? ""
     }
 
-    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?) -> AsyncThrowingStream<String, Error> {
+    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -41,11 +44,14 @@ final class OpenAIChatCompletionsClient: LLMClient {
                     var body: [String: Any] = [
                         "model": model,
                         "stream": true,
-                        "messages": messages.map { ["role": $0.role, "content": $0.content] },
+                        "messages": messages.map { Self.formatMessage($0) },
                         "temperature": temperature
                     ]
                     if let maxTokens = maxTokens {
                         body["max_tokens"] = maxTokens
+                    }
+                    if options.reasoningEffort != .off {
+                        body["reasoning"] = ["effort": options.reasoningEffort.rawValue]
                     }
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -155,5 +161,22 @@ final class OpenAIChatCompletionsClient: LLMClient {
             return nil
         }
         return extractErrorMessage(from: obj)
+    }
+
+    private static func formatMessage(_ message: ChatMessage) -> [String: Any] {
+        if message.images.isEmpty {
+            return ["role": message.role, "content": message.content]
+        }
+        var parts: [[String: Any]] = []
+        if !message.content.isEmpty {
+            parts.append(["type": "text", "text": message.content])
+        }
+        for image in message.images {
+            parts.append([
+                "type": "image_url",
+                "image_url": ["url": image.dataURL]
+            ])
+        }
+        return ["role": message.role, "content": parts]
     }
 }

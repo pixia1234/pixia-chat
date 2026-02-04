@@ -1,8 +1,10 @@
 import SwiftUI
+import UIKit
 
 struct ChatBubbleView: View {
     let role: String
     let text: String
+    var imageData: Data? = nil
     var isDraft: Bool = false
 
     var body: some View {
@@ -70,6 +72,13 @@ struct ChatBubbleView: View {
 
     private var bubbleView: some View {
         VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 8) {
+            if let imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
             if isAssistant && !isDraft {
                 if requiresWebView(text) {
                     MarkdownView(text: text)

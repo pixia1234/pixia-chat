@@ -29,8 +29,13 @@ final class SettingsViewModel: ObservableObject {
     @Published var contextLimit: Int {
         didSet { store.contextLimit = contextLimit }
     }
+    @Published var reasoningEffort: ReasoningEffort {
+        didSet { store.reasoningEffort = reasoningEffort }
+    }
     @Published var isTesting: Bool = false
     @Published var testStatus: String?
+    @Published var imageTestStatus: String?
+    @Published var reasoningTestStatus: String?
 
     private let store: SettingsStore
 
@@ -45,6 +50,7 @@ final class SettingsViewModel: ObservableObject {
         self.stream = store.stream
         self.systemPrompt = store.systemPrompt
         self.contextLimit = store.contextLimit
+        self.reasoningEffort = store.reasoningEffort
     }
 
     func clearKey() {
@@ -53,6 +59,8 @@ final class SettingsViewModel: ObservableObject {
 
     func testConnection() {
         testStatus = nil
+        imageTestStatus = nil
+        reasoningTestStatus = nil
 
         guard !apiKey.isEmpty else {
             testStatus = "API Key 为空"
@@ -86,7 +94,8 @@ final class SettingsViewModel: ObservableObject {
                     messages: [ChatMessage(role: ChatRole.user, content: "ping")],
                     model: model,
                     temperature: temperature,
-                    maxTokens: 16
+                    maxTokens: 16,
+                    options: .default
                 )
                 await MainActor.run {
                     self.testStatus = "连接成功"
@@ -101,5 +110,119 @@ final class SettingsViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    func testImageSupport() {
+        imageTestStatus = nil
+        guard !apiKey.isEmpty else {
+            imageTestStatus = "API Key 为空"
+            return
+        }
+        guard let url = URL(string: baseURL) else {
+            imageTestStatus = "Base URL 无效"
+            return
+        }
+
+        let apiKey = apiKey
+        let model = model
+        let apiMode = apiMode
+        let temperature = temperature
+
+        isTesting = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            let client: LLMClient = {
+                switch apiMode {
+                case .chatCompletions:
+                    return OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+                case .responses:
+                    return OpenAIResponsesClient(baseURL: url, apiKey: apiKey)
+                }
+            }()
+
+            let imageData = Self.sampleImageData()
+            let image = ChatImage(data: imageData, mimeType: "image/png")
+            let message = ChatMessage(role: ChatRole.user, content: "这张图的主要颜色是什么？", images: [image])
+
+            do {
+                _ = try await client.send(
+                    messages: [message],
+                    model: model,
+                    temperature: temperature,
+                    maxTokens: 64,
+                    options: .default
+                )
+                await MainActor.run {
+                    self.imageTestStatus = "图片测试成功"
+                    self.isTesting = false
+                    Haptics.success()
+                }
+            } catch {
+                await MainActor.run {
+                    self.imageTestStatus = "图片测试失败：\(error.localizedDescription)"
+                    self.isTesting = false
+                    Haptics.light()
+                }
+            }
+        }
+    }
+
+    func testReasoningSupport() {
+        reasoningTestStatus = nil
+        guard !apiKey.isEmpty else {
+            reasoningTestStatus = "API Key 为空"
+            return
+        }
+        guard let url = URL(string: baseURL) else {
+            reasoningTestStatus = "Base URL 无效"
+            return
+        }
+
+        let apiKey = apiKey
+        let model = model
+        let apiMode = apiMode
+        let temperature = temperature
+
+        isTesting = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            let client: LLMClient = {
+                switch apiMode {
+                case .chatCompletions:
+                    return OpenAIChatCompletionsClient(baseURL: url, apiKey: apiKey)
+                case .responses:
+                    return OpenAIResponsesClient(baseURL: url, apiKey: apiKey)
+                }
+            }()
+
+            let message = ChatMessage(role: ChatRole.user, content: "请用推理回答：1+1=?")
+            do {
+                _ = try await client.send(
+                    messages: [message],
+                    model: model,
+                    temperature: temperature,
+                    maxTokens: 32,
+                    options: LLMRequestOptions(reasoningEffort: .medium)
+                )
+                await MainActor.run {
+                    self.reasoningTestStatus = "推理测试成功"
+                    self.isTesting = false
+                    Haptics.success()
+                }
+            } catch {
+                await MainActor.run {
+                    self.reasoningTestStatus = "推理测试失败：\(error.localizedDescription)"
+                    self.isTesting = false
+                    Haptics.light()
+                }
+            }
+        }
+    }
+
+    private static func sampleImageData() -> Data {
+        let base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABBAEAi9tqWQAAAABJRU5ErkJggg=="
+        return Data(base64Encoded: base64) ?? Data()
     }
 }

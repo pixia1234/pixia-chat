@@ -9,7 +9,7 @@ final class OpenAIResponsesClient: LLMClient {
         self.apiKey = apiKey
     }
 
-    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?) async throws -> String {
+    func send(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) async throws -> String {
         var request = makeRequest(path: "v1/responses")
         var body: [String: Any] = [
             "model": model,
@@ -18,6 +18,9 @@ final class OpenAIResponsesClient: LLMClient {
         ]
         if let maxTokens = maxTokens {
             body["max_output_tokens"] = maxTokens
+        }
+        if options.reasoningEffort != .off {
+            body["reasoning"] = ["effort": options.reasoningEffort.rawValue]
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -31,7 +34,7 @@ final class OpenAIResponsesClient: LLMClient {
         return Self.extractOutputText(from: json) ?? ""
     }
 
-    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?) -> AsyncThrowingStream<String, Error> {
+    func stream(messages: [ChatMessage], model: String, temperature: Double, maxTokens: Int?, options: LLMRequestOptions) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -44,6 +47,9 @@ final class OpenAIResponsesClient: LLMClient {
                     ]
                     if let maxTokens = maxTokens {
                         body["max_output_tokens"] = maxTokens
+                    }
+                    if options.reasoningEffort != .off {
+                        body["reasoning"] = ["effort": options.reasoningEffort.rawValue]
                     }
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -131,18 +137,27 @@ final class OpenAIResponsesClient: LLMClient {
 
     private static func formatInput(messages: [ChatMessage]) -> [[String: Any]] {
         return messages.map { message in
-            let contentType: String
-            switch message.role {
-            case ChatRole.assistant:
-                contentType = "output_text"
-            default:
-                contentType = "input_text"
+            if message.role == ChatRole.assistant {
+                return [
+                    "role": message.role,
+                    "content": [
+                        ["type": "output_text", "text": message.content]
+                    ]
+                ]
+            }
+            var content: [[String: Any]] = []
+            if !message.content.isEmpty {
+                content.append(["type": "input_text", "text": message.content])
+            }
+            for image in message.images {
+                content.append([
+                    "type": "input_image",
+                    "image_url": image.dataURL
+                ])
             }
             return [
                 "role": message.role,
-                "content": [
-                    ["type": contentType, "text": message.content]
-                ]
+                "content": content
             ]
         }
     }

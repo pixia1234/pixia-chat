@@ -16,6 +16,10 @@ struct ChatView: View {
     @State private var sharePayload: SharePayload?
     @State private var isUserDragging = false
     @State private var dragResetWorkItem: DispatchWorkItem?
+    @State private var showImagePicker = false
+    @State private var pendingImage: UIImage?
+    @State private var pendingImageData: Data?
+    @State private var pendingImageMimeType: String?
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
@@ -41,7 +45,7 @@ struct ChatView: View {
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
                                 ForEach(messages, id: \.objectID) { message in
-                                    ChatBubbleView(role: message.role, text: message.content)
+                                    ChatBubbleView(role: message.role, text: message.content, imageData: message.imageData)
                                         .id(message.objectID)
                                         .contextMenu {
                                             messageContextMenu(message)
@@ -87,7 +91,34 @@ struct ChatView: View {
                             ThinkingBarView()
                         }
 
+                        if let pendingImage {
+                            HStack(alignment: .top) {
+                                Image(uiImage: pendingImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxHeight: 140)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                Button {
+                                    clearPendingImage()
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.top, 4)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 4)
+                        }
+
                         HStack(alignment: .bottom, spacing: 8) {
+                            Button {
+                                showImagePicker = true
+                            } label: {
+                                Image(systemName: "photo")
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(viewModel.isStreaming)
+
                             inputField
                                 .scaleEffect(sendPulse ? 0.98 : 1.0)
                                 .animation(.spring(response: 0.22, dampingFraction: 0.7), value: sendPulse)
@@ -101,7 +132,12 @@ struct ChatView: View {
                             } else {
                                 Button("发送") {
                                     triggerSendPulse()
-                                    viewModel.send(session: session)
+                                    let imageData = pendingImageData ?? pendingImage?.jpegData(compressionQuality: 0.9)
+                                    let attachment = imageData.map { ChatImage(data: $0, mimeType: pendingImageMimeType ?? "image/jpeg") }
+                                    let didSend = viewModel.send(session: session, image: attachment)
+                                    if didSend {
+                                        clearPendingImage()
+                                    }
                                     Haptics.light()
                                 }
                                 .buttonStyle(.borderedProminent)
@@ -174,6 +210,13 @@ struct ChatView: View {
         .sheet(item: $sharePayload) { payload in
             ShareSheet(items: payload.items)
         }
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(
+                image: $pendingImage,
+                imageData: $pendingImageData,
+                mimeType: $pendingImageMimeType
+            )
+        }
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {
@@ -232,6 +275,12 @@ struct ChatView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             sendPulse = false
         }
+    }
+
+    private func clearPendingImage() {
+        pendingImage = nil
+        pendingImageData = nil
+        pendingImageMimeType = nil
     }
 
     private var titleText: String {

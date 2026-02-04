@@ -53,6 +53,17 @@ enum CoreDataModel {
         messageContent.attributeType = .stringAttributeType
         messageContent.isOptional = false
 
+        let messageImageData = NSAttributeDescription()
+        messageImageData.name = "imageData"
+        messageImageData.attributeType = .binaryDataAttributeType
+        messageImageData.isOptional = true
+        messageImageData.allowsExternalBinaryDataStorage = true
+
+        let messageImageMimeType = NSAttributeDescription()
+        messageImageMimeType.name = "imageMimeType"
+        messageImageMimeType.attributeType = .stringAttributeType
+        messageImageMimeType.isOptional = true
+
         let messageCreatedAt = NSAttributeDescription()
         messageCreatedAt.name = "createdAt"
         messageCreatedAt.attributeType = .dateAttributeType
@@ -78,7 +89,7 @@ enum CoreDataModel {
         sessionRel.inverseRelationship = messagesRel
 
         sessionEntity.properties = [sessionId, sessionTitle, sessionCreatedAt, sessionUpdatedAt, sessionPinned, messagesRel]
-        messageEntity.properties = [messageId, messageRole, messageContent, messageCreatedAt, sessionRel]
+        messageEntity.properties = [messageId, messageRole, messageContent, messageImageData, messageImageMimeType, messageCreatedAt, sessionRel]
 
         model.entities = [sessionEntity, messageEntity]
         return model

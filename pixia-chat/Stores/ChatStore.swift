@@ -48,15 +48,17 @@ struct ChatStore {
     }
 
     @discardableResult
-    func addMessage(to session: ChatSession, role: String, content: String) -> Message {
+    func addMessage(to session: ChatSession, role: String, content: String, imageData: Data? = nil, imageMimeType: String? = nil) -> Message {
         let message = Message(context: context)
         message.id = UUID()
         message.role = role
         message.content = content
+        message.imageData = imageData
+        message.imageMimeType = imageMimeType
         message.createdAt = Date()
         message.session = session
         session.updatedAt = Date()
-        if session.title == "新的对话" && role == ChatRole.user {
+        if session.title == "新的对话" && role == ChatRole.user && !content.isEmpty {
             session.title = previewTitle(from: content)
         }
         DebugLogger.log("addMessage session=\(session.id.uuidString) role=\(role) chars=\(content.count)")

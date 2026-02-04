@@ -21,10 +21,11 @@ final class ChatViewModel: ObservableObject {
         self.settings = settings
     }
 
-    func send(session: ChatSession) {
+    @discardableResult
+    func send(session: ChatSession, image: ChatImage? = nil) -> Bool {
         guard isSessionValid(session) else { return }
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty || image != nil else { return false }
         inputText = ""
 
         let store = ChatStore(context: context)
@@ -32,10 +33,11 @@ final class ChatViewModel: ObservableObject {
         if session.messagesArray.isEmpty, !systemPrompt.isEmpty {
             store.addMessage(to: session, role: ChatRole.system, content: systemPrompt)
         }
-        store.addMessage(to: session, role: ChatRole.user, content: trimmed)
+        store.addMessage(to: session, role: ChatRole.user, content: trimmed, imageData: image?.data, imageMimeType: image?.mimeType)
 
-        let requestMessages = session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }
+        let requestMessages = session.messagesArray.map { self.buildMessage(from: $0) }
         performRequest(session: session, requestMessages: requestMessages, label: "send")
+        return true
     }
 
     func regenerate(session: ChatSession, from message: Message) {
@@ -53,9 +55,9 @@ final class ChatViewModel: ObservableObject {
 
         let requestMessages = session.messagesArray
             .filter { $0.role != ChatRole.system }
-            .map { ChatMessage(role: $0.role, content: $0.content) }
+            .map { self.buildMessage(from: $0) }
         guard let last = requestMessages.last, last.role == ChatRole.user else { return }
-        performRequest(session: session, requestMessages: session.messagesArray.map { ChatMessage(role: $0.role, content: $0.content) }, label: "regenerate")
+        performRequest(session: session, requestMessages: session.messagesArray.map { self.buildMessage(from: $0) }, label: "regenerate")
     }
 
     func updateMessage(_ message: Message, content: String) {
@@ -101,6 +103,7 @@ final class ChatViewModel: ObservableObject {
 
         let maxTokens = settings.maxTokens > 0 ? settings.maxTokens : nil
         let temperature = settings.temperature
+        let options = LLMRequestOptions(reasoningEffort: settings.reasoningEffort)
         let cappedMessages = applyContextLimit(requestMessages)
 
         if settings.stream {
@@ -110,7 +113,7 @@ final class ChatViewModel: ObservableObject {
             streamTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    for try await token in client.stream(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens) {
+                    for try await token in client.stream(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options) {
                         if Task.isCancelled { break }
                         self.appendStreamText(token)
                     }
@@ -127,7 +130,7 @@ final class ChatViewModel: ObservableObject {
             Task { [weak self] in
                 guard let self else { return }
                 do {
-                    let text = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens)
+                    let text = try await client.send(messages: cappedMessages, model: settings.model, temperature: temperature, maxTokens: maxTokens, options: options)
                     if self.isSessionValid(session), !text.isEmpty {
                         let store = ChatStore(context: self.context)
                         store.addMessage(to: session, role: ChatRole.assistant, content: text)
@@ -223,6 +226,15 @@ final class ChatViewModel: ObservableObject {
         return systemMessages + historyMessages.suffix(limit)
     }
 
+    private func buildMessage(from message: Message) -> ChatMessage {
+        var images: [ChatImage] = []
+        if let data = message.imageData {
+            let mimeType = message.imageMimeType ?? "image/jpeg"
+            images = [ChatImage(data: data, mimeType: mimeType)]
+        }
+        return ChatMessage(role: message.role, content: message.content, images: images)
+    }
+
     private func maybeGenerateTitle(for session: ChatSession) {
         guard !isGeneratingTitle else { return }
         guard isSessionValid(session) else { return }
@@ -259,7 +271,8 @@ final class ChatViewModel: ObservableObject {
                     messages: summaryPrompt,
                     model: self.settings.model,
                     temperature: 0.2,
-                    maxTokens: 32
+                    maxTokens: 32,
+                    options: .default
                 )
                 let cleaned = self.cleanTitle(title)
                 guard !cleaned.isEmpty, self.isSessionValid(session) else { return }
