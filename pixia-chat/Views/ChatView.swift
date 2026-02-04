@@ -29,7 +29,7 @@ struct ChatView: View {
             predicate: NSPredicate(format: "session == %@", session)
         )
         UITextView.appearance().backgroundColor = .clear
-        UITextView.appearance().textContainerInset = UIEdgeInsets(top: 4, left: 2, bottom: 4, right: 2)
+        UITextView.appearance().textContainerInset = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
     }
 
     var body: some View {
@@ -201,20 +201,20 @@ struct ChatView: View {
                     .lineLimit(1...6)
                     .padding(12)
             } else {
-                let minHeight: CGFloat = isPad ? 24 : 32
-                let maxHeight: CGFloat = isPad ? 88 : 140
+                let minHeight: CGFloat = isPad ? 20 : 32
+                let maxHeight: CGFloat = isPad ? 64 : 140
                 ZStack(alignment: .topLeading) {
                     if viewModel.inputText.isEmpty {
                         Text("输入消息...")
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 2)
                     }
                     TextEditor(text: $viewModel.inputText)
                         .font(.body)
                         .frame(minHeight: minHeight, maxHeight: maxHeight)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 2)
+                        .padding(.vertical, 1)
                 }
             }
         }
@@ -290,8 +290,8 @@ struct ChatView: View {
                     shareItems = [url]
                     showShare = true
                     Haptics.light()
-                case .failure(let message):
-                    viewModel.errorMessage = message
+                case .failure(let error):
+                    viewModel.errorMessage = error.message
                 }
             }
         }

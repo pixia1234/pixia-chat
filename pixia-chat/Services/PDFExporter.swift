@@ -13,8 +13,19 @@ struct ChatExportMessage {
     let createdAt: Date
 }
 
+enum PDFExportError: Error {
+    case failed(String)
+
+    var message: String {
+        switch self {
+        case .failed(let text):
+            return text
+        }
+    }
+}
+
 struct PDFExporter {
-    static func export(session: ChatExportSession, messages: [ChatExportMessage]) -> Result<URL, String> {
+    static func export(session: ChatExportSession, messages: [ChatExportMessage]) -> Result<URL, PDFExportError> {
         let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4
         let margin: CGFloat = 32
         let contentWidth = pageRect.width - margin * 2
@@ -98,7 +109,7 @@ struct PDFExporter {
             return .success(url)
         } catch {
             DebugLogger.log("pdf export error: \(error.localizedDescription)")
-            return .failure("导出失败")
+            return .failure(.failed("导出失败"))
         }
     }
 }
