@@ -45,6 +45,8 @@ jobs:
         run: |
           set -euo pipefail
           ARCHIVE_PATH="$PWD/build/PixiaChat.xcarchive"
+          VERSION=$( /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" pixia-chat/Info.plist )
+          TS=$(date -u +%Y%m%d-%H%M%S)
           xcodebuild \
             -project "$PROJECT" \
             -scheme "$SCHEME" \
@@ -67,13 +69,15 @@ jobs:
           fi
           mkdir -p build/unsigned/Payload
           cp -R "$APP_PATH" build/unsigned/Payload/
-          (cd build/unsigned && /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$PWD/PixiaChat-unsigned.ipa")
+          OUT_NAME="pixia-chat-${VERSION}-${TS}.ipa"
+          (cd build/unsigned && /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$PWD/$OUT_NAME")
+          echo "UNSIGNED_IPA_NAME=$OUT_NAME" >> $GITHUB_ENV
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: PixiaChat-unsigned-ipa
-          path: build/unsigned/PixiaChat-unsigned.ipa
+          name: pixia-chat-unsigned-ipa
+          path: build/unsigned/${{ env.UNSIGNED_IPA_NAME }}
 
       - name: Install signing certificate
         if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
@@ -112,6 +116,9 @@ jobs:
         if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         run: |
           mkdir -p build/export
+          VERSION=$( /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" pixia-chat/Info.plist )
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          SIGNED_NAME="pixia-chat-${VERSION}-${TS}.ipa"
           EXPORT_METHOD_VALUE=${EXPORT_METHOD:-ad-hoc}
           cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -137,10 +144,14 @@ jobs:
             -archivePath "$PWD/build/PixiaChat.xcarchive" \
             -exportOptionsPlist ExportOptions.plist \
             -exportPath "$PWD/build/export"
+          if ls build/export/*.ipa 1> /dev/null 2>&1; then
+            mv build/export/*.ipa "build/export/$SIGNED_NAME"
+            echo "SIGNED_IPA_NAME=$SIGNED_NAME" >> $GITHUB_ENV
+          fi
 
       - name: Upload IPA
         if: ${{ env.P12_BASE64 != '' && env.P12_PASSWORD != '' && env.PROFILE_BASE64 != '' && env.TEAM_ID != '' && env.PROFILE_NAME != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: PixiaChat-ipa
-          path: build/export/*.ipa
+          name: pixia-chat-ipa
+          path: build/export/${{ env.SIGNED_IPA_NAME }}
