@@ -15,6 +15,7 @@ struct ChatView: View {
     @State private var editingMessageID: NSManagedObjectID?
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
 
     init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {
         self._session = ObservedObject(wrappedValue: session)
@@ -170,16 +171,20 @@ struct ChatView: View {
                     .lineLimit(1...6)
                     .padding(12)
             } else {
+                let minHeight: CGFloat = isPad ? 28 : 36
+                let maxHeight: CGFloat = isPad ? 110 : 140
                 ZStack(alignment: .topLeading) {
                     if viewModel.inputText.isEmpty {
                         Text("输入消息...")
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
                     }
                     TextEditor(text: $viewModel.inputText)
-                        .frame(minHeight: 36, maxHeight: 140)
-                        .padding(8)
+                        .font(.body)
+                        .frame(minHeight: minHeight, maxHeight: maxHeight)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 4)
                 }
             }
         }
