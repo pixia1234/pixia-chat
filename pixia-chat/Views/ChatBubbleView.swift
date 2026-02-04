@@ -1,9 +1,9 @@
 import SwiftUI
-import UIKit
 
 struct ChatBubbleView: View {
     let role: String
     let text: String
+    var isDraft: Bool = false
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -22,6 +22,10 @@ struct ChatBubbleView: View {
 
     private var isUser: Bool {
         role == ChatRole.user || role == ChatRole.system
+    }
+
+    private var isAssistant: Bool {
+        role == ChatRole.assistant
     }
 
     private var avatarView: some View {
@@ -43,15 +47,13 @@ struct ChatBubbleView: View {
 
     private var bubbleView: some View {
         VStack(alignment: isUser ? .trailing : .leading, spacing: 8) {
-            ForEach(segments) { segment in
-                if segment.isCode {
-                    CodeBlockView(text: segment.text)
-                } else {
-                    Text(segment.text)
-                        .foregroundColor(isUser ? .white : .primary)
-                        .multilineTextAlignment(isUser ? .trailing : .leading)
-                        .textSelection(.enabled)
-                }
+            if isAssistant && !isDraft {
+                MarkdownView(text: text)
+            } else {
+                Text(text)
+                    .foregroundColor(isUser ? .white : .primary)
+                    .multilineTextAlignment(isUser ? .trailing : .leading)
+                    .textSelection(.enabled)
             }
         }
         .padding(12)
@@ -75,60 +77,6 @@ struct ChatBubbleView: View {
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .frame(maxWidth: 520, alignment: isUser ? .trailing : .leading)
-    }
-
-    private var segments: [TextSegment] {
-        parseSegments(text)
-    }
-
-    private func parseSegments(_ input: String) -> [TextSegment] {
-        let parts = input.components(separatedBy: "```")
-        if parts.count == 1 {
-            return [TextSegment(text: input, isCode: false)]
-        }
-        var segments: [TextSegment] = []
-        for (index, part) in parts.enumerated() {
-            let trimmed = part.trimmingCharacters(in: .newlines)
-            guard !trimmed.isEmpty else { continue }
-            segments.append(TextSegment(text: trimmed, isCode: index % 2 == 1))
-        }
-        return segments.isEmpty ? [TextSegment(text: input, isCode: false)] : segments
-    }
-}
-
-private struct TextSegment: Identifiable {
-    let id = UUID()
-    let text: String
-    let isCode: Bool
-}
-
-private struct CodeBlockView: View {
-    let text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text("代码")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Button("复制") {
-                    UIPasteboard.general.string = text
-                    Haptics.light()
-                }
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.9))
-            }
-            Text(text)
-                .font(.system(.body, design: .monospaced))
-                .foregroundColor(.white)
-                .textSelection(.enabled)
-        }
-        .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.black.opacity(0.85))
-        )
     }
 }
 

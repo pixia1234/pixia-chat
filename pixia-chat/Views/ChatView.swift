@@ -43,7 +43,7 @@ struct ChatView: View {
                                         }
                                 }
                                 if !viewModel.assistantDraft.isEmpty {
-                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft)
+                                    ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft, isDraft: true)
                                         .id("draft")
                                 }
                                 if viewModel.isAwaitingResponse && viewModel.assistantDraft.isEmpty {
