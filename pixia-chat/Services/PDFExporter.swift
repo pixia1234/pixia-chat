@@ -70,7 +70,7 @@ struct PDFExporter {
             return .failure(.failed("导出失败"))
         }
 
-        let data = await MainActor.run { renderPDFData(from: webView, pageRect: pageRect, margin: margin) }
+        let data = await createPDFData(from: webView, pageRect: pageRect, margin: margin)
         guard let data else {
             return .failure(.failed("导出失败"))
         }
@@ -91,14 +91,64 @@ struct PDFExporter {
         renderer.setValue(pageRect, forKey: "paperRect")
         renderer.setValue(printableRect, forKey: "printableRect")
 
+        renderer.prepare(forDrawingPages: NSRange(location: 0, length: 1))
+        let pageCount = max(renderer.numberOfPages, 1)
+
         let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
         let data = pdfRenderer.pdfData { context in
-            for pageIndex in 0..<renderer.numberOfPages {
+            for pageIndex in 0..<pageCount {
                 context.beginPage()
                 renderer.drawPage(at: pageIndex, in: printableRect)
             }
         }
-        return data
+        return data.isEmpty ? nil : data
+    }
+
+    private static func createPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat) async -> Data? {
+        await MainActor.run {
+            webView.frame = CGRect(origin: .zero, size: pageRect.size)
+            webView.setNeedsLayout()
+            webView.layoutIfNeeded()
+        }
+        await waitForLayout(webView)
+
+        if #available(iOS 14.0, *) {
+            let config = WKPDFConfiguration()
+            config.rect = CGRect(origin: .zero, size: pageRect.size)
+            let data: Data? = await withCheckedContinuation { continuation in
+                webView.createPDF(configuration: config) { result in
+                    switch result {
+                    case .success(let data):
+                        continuation.resume(returning: data)
+                    case .failure:
+                        continuation.resume(returning: nil)
+                    }
+                }
+            }
+            if let data, !data.isEmpty {
+                return data
+            }
+        }
+        return await MainActor.run { renderPDFData(from: webView, pageRect: pageRect, margin: margin) }
+    }
+
+    private static func waitForLayout(_ webView: WKWebView) async {
+        for _ in 0..<6 {
+            if let height = await evaluateJS(webView, script: "document.body && document.body.scrollHeight || 0") as? Double,
+               height > 10 {
+                break
+            }
+            try? await Task.sleep(nanoseconds: 120_000_000)
+        }
+        try? await Task.sleep(nanoseconds: 120_000_000)
+    }
+
+    private static func evaluateJS(_ webView: WKWebView, script: String) async -> Any? {
+        await withCheckedContinuation { continuation in
+            webView.evaluateJavaScript(script) { result, _ in
+                continuation.resume(returning: result)
+            }
+        }
     }
 
     private static func buildMessagePayloads(messages: [ChatExportMessage], formatter: DateFormatter) -> [[String: Any]] {
