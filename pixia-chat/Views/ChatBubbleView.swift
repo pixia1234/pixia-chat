@@ -71,7 +71,14 @@ struct ChatBubbleView: View {
     private var bubbleView: some View {
         VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 8) {
             if isAssistant && !isDraft {
-                MarkdownView(text: text)
+                if requiresWebView(text) {
+                    MarkdownView(text: text)
+                } else {
+                    Text(.init(text))
+                        .foregroundColor(textColor)
+                        .multilineTextAlignment(isRightAligned ? .trailing : .leading)
+                        .textSelection(.enabled)
+                }
             } else {
                 Text(text)
                     .foregroundColor(textColor)
@@ -117,6 +124,14 @@ struct ChatBubbleView: View {
         if isUser { return .white }
         if isSystem { return .primary }
         return .primary
+    }
+
+    private func requiresWebView(_ text: String) -> Bool {
+        if text.contains("```") { return true }
+        if text.contains("$$") || text.contains("\\(") || text.contains("\\[") { return true }
+        if text.range(of: #"\$[^$\n]+\$"#, options: .regularExpression) != nil { return true }
+        if text.contains("\n|") && text.contains("|") { return true }
+        return false
     }
 }
 
