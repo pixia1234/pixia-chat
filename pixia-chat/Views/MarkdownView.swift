@@ -190,8 +190,22 @@ private struct MarkdownWebView: UIViewRepresentable {
               style.setProperty("--link-color", link);
             }
 
+            function preprocessMath(text) {
+              if (!text || text.indexOf("\\\\[") === -1) {
+                return text;
+              }
+              const parts = text.split("```");
+              for (let i = 0; i < parts.length; i += 2) {
+                parts[i] = parts[i].replace(/\\\\\\[([\\s\\S]+?)\\\\\\]/g, function(_, inner) {
+                  return "$$" + inner + "$$";
+                });
+              }
+              return parts.join("```");
+            }
+
             window.updateMarkdown = function(text) {
-              document.getElementById('content').innerHTML = md.render(text);
+              const prepared = preprocessMath(text);
+              document.getElementById('content').innerHTML = md.render(prepared);
               setTimeout(reportHeight, 0);
             }
 
