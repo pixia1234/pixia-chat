@@ -47,11 +47,12 @@ struct ChatView: View {
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
                                 ForEach(messages, id: \.objectID) { message in
+                                    let resolvedImageData = message.imageData ?? ChatImageStore.shared.loadImage(id: message.id)
                                     ChatBubbleView(
                                         role: message.role,
                                         text: message.content,
                                         reasoning: message.reasoning,
-                                        imageData: message.imageData,
+                                        imageData: resolvedImageData,
                                         contextMenuContent: { AnyView(messageContextMenu(message)) }
                                     )
                                     .id(message.objectID)

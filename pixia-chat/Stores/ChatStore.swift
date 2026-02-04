@@ -19,12 +19,17 @@ struct ChatStore {
 
     func deleteSession(_ session: ChatSession) {
         DebugLogger.log("deleteSession id=\(session.id.uuidString) deleted=\(session.isDeleted)")
+        let messageIDs = session.messages?.map(\.id) ?? []
+        for id in messageIDs {
+            ChatImageStore.shared.removeImage(id: id)
+        }
         context.delete(session)
         saveContext()
     }
 
     func deleteMessage(_ message: Message) {
         DebugLogger.log("deleteMessage id=\(message.id.uuidString) role=\(message.role)")
+        ChatImageStore.shared.removeImage(id: message.id)
         context.delete(message)
         saveContext()
     }
@@ -32,6 +37,7 @@ struct ChatStore {
     func deleteMessages(_ messages: [Message]) {
         guard !messages.isEmpty else { return }
         for message in messages {
+            ChatImageStore.shared.removeImage(id: message.id)
             context.delete(message)
         }
         DebugLogger.log("deleteMessages count=\(messages.count)")
@@ -58,6 +64,9 @@ struct ChatStore {
         message.reasoning = reasoning
         message.createdAt = Date()
         message.session = session
+        if let imageData {
+            ChatImageStore.shared.saveImage(data: imageData, id: message.id)
+        }
         session.updatedAt = Date()
         if session.title == "新的对话" && role == ChatRole.user && !content.isEmpty {
             session.title = previewTitle(from: content)
@@ -105,5 +114,50 @@ struct ChatStore {
             cleaned = String(cleaned.prefix(limit)) + "..."
         }
         return cleaned.isEmpty ? "新的对话" : cleaned
+    }
+}
+
+final class ChatImageStore {
+    static let shared = ChatImageStore()
+    private let cache = NSCache<NSString, NSData>()
+    private let fileManager = FileManager.default
+
+    private var directoryURL: URL? {
+        guard let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+        }
+        let dir = base.appendingPathComponent("ChatImages", isDirectory: true)
+        if !fileManager.fileExists(atPath: dir.path) {
+            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+        return dir
+    }
+
+    func saveImage(data: Data, id: UUID) {
+        let key = id.uuidString as NSString
+        cache.setObject(data as NSData, forKey: key)
+        guard let url = fileURL(for: id) else { return }
+        try? data.write(to: url, options: [.atomic])
+    }
+
+    func loadImage(id: UUID) -> Data? {
+        let key = id.uuidString as NSString
+        if let cached = cache.object(forKey: key) {
+            return cached as Data
+        }
+        guard let url = fileURL(for: id), let data = try? Data(contentsOf: url) else { return nil }
+        cache.setObject(data as NSData, forKey: key)
+        return data
+    }
+
+    func removeImage(id: UUID) {
+        let key = id.uuidString as NSString
+        cache.removeObject(forKey: key)
+        guard let url = fileURL(for: id) else { return }
+        try? fileManager.removeItem(at: url)
+    }
+
+    private func fileURL(for id: UUID) -> URL? {
+        directoryURL?.appendingPathComponent("\(id.uuidString).bin")
     }
 }

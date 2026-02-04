@@ -8,6 +8,8 @@ struct ChatBubbleView: View {
     var imageData: Data? = nil
     var isDraft: Bool = false
     var contextMenuContent: (() -> AnyView)? = nil
+    @State private var showImagePreview = false
+    @State private var previewImage: UIImage?
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -22,6 +24,11 @@ struct ChatBubbleView: View {
         .frame(maxWidth: .infinity, alignment: isRightAligned ? .trailing : .leading)
         .padding(.horizontal)
         .padding(.vertical, 6)
+        .fullScreenCover(isPresented: $showImagePreview) {
+            if let previewImage {
+                ImagePreviewView(image: previewImage)
+            }
+        }
     }
 
     private var isUser: Bool {
@@ -75,11 +82,17 @@ struct ChatBubbleView: View {
     private var bubbleView: some View {
         VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 8) {
             if let imageData, let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: 240)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Button {
+                    previewImage = uiImage
+                    showImagePreview = true
+                } label: {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 240)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
             }
             if let reasoning, !reasoning.isEmpty {
                 VStack(alignment: isRightAligned ? .trailing : .leading, spacing: 4) {
@@ -215,5 +228,32 @@ private struct ChatBubbleShape: Shape {
                     clockwise: false)
         path.closeSubpath()
         return path
+    }
+}
+
+private struct ImagePreviewView: View {
+    let image: UIImage
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .onTapGesture {
+                    dismiss()
+                }
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(16)
+            }
+        }
     }
 }
