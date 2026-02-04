@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import WebKit
 
 struct ChatExportSession {
     let id: UUID
@@ -12,6 +13,8 @@ struct ChatExportMessage {
     let content: String
     let reasoning: String?
     let createdAt: Date
+    let imageData: Data?
+    let imageMimeType: String?
 }
 
 enum PDFExportError: Error {
@@ -26,37 +29,80 @@ enum PDFExportError: Error {
 }
 
 struct PDFExporter {
-    static func export(session: ChatExportSession, messages: [ChatExportMessage]) -> Result<URL, PDFExportError> {
+    static func export(session: ChatExportSession, messages: [ChatExportMessage]) async -> Result<URL, PDFExportError> {
         let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4
         let margin: CGFloat = 32
-        let contentWidth = pageRect.width - margin * 2
 
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineBreakMode = .byWordWrapping
-
-        let titleFont = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        let bodyFont = UIFont.systemFont(ofSize: 12)
-        let metaFont = UIFont.systemFont(ofSize: 10)
-
-        let title = session.title
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "zh_CN")
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .short
-        let createdAt = dateFormatter.string(from: session.createdAt)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("PixiaChat-\(session.id.uuidString).pdf")
 
-        var blocks: [NSAttributedString] = []
-        blocks.append(NSAttributedString(string: title, attributes: [
-            .font: titleFont,
-            .paragraphStyle: paragraphStyle
-        ]))
-        blocks.append(NSAttributedString(string: "创建时间：\(createdAt)", attributes: [
-            .font: metaFont,
-            .foregroundColor: UIColor.secondaryLabel,
-            .paragraphStyle: paragraphStyle
-        ]))
+        let payloads = buildMessagePayloads(messages: messages, formatter: dateFormatter)
+        let html = htmlTemplate(
+            title: session.title,
+            createdAt: dateFormatter.string(from: session.createdAt),
+            messagesJSON: jsonString(from: payloads)
+        )
 
-        for message in messages {
+        let coordinator = PDFWebViewCoordinator()
+        let webView = await MainActor.run { () -> WKWebView in
+            let controller = WKUserContentController()
+            controller.add(coordinator, name: "ready")
+            let config = WKWebViewConfiguration()
+            config.userContentController = controller
+            let view = WKWebView(frame: CGRect(x: 0, y: 0, width: pageRect.width, height: pageRect.height), configuration: config)
+            view.isOpaque = false
+            view.backgroundColor = .clear
+            view.scrollView.isScrollEnabled = false
+            view.navigationDelegate = coordinator
+            return view
+        }
+
+        await MainActor.run {
+            webView.loadHTMLString(html, baseURL: Bundle.main.bundleURL)
+        }
+
+        let ready = await coordinator.waitReady()
+        guard ready else {
+            DebugLogger.log("pdf export error: webview not ready")
+            return .failure(.failed("导出失败"))
+        }
+
+        let data = await MainActor.run { renderPDFData(from: webView, pageRect: pageRect, margin: margin) }
+        guard let data else {
+            return .failure(.failed("导出失败"))
+        }
+        do {
+            try data.write(to: url, options: [.atomic])
+            return .success(url)
+        } catch {
+            DebugLogger.log("pdf export error: \(error.localizedDescription)")
+            return .failure(.failed("导出失败"))
+        }
+    }
+
+    private static func renderPDFData(from webView: WKWebView, pageRect: CGRect, margin: CGFloat) -> Data? {
+        let formatter = webView.viewPrintFormatter()
+        let renderer = UIPrintPageRenderer()
+        renderer.addPrintFormatter(formatter, startingAtPageAt: 0)
+        let printableRect = pageRect.insetBy(dx: margin, dy: margin)
+        renderer.setValue(pageRect, forKey: "paperRect")
+        renderer.setValue(printableRect, forKey: "printableRect")
+
+        let pdfRenderer = UIGraphicsPDFRenderer(bounds: pageRect)
+        let data = pdfRenderer.pdfData { context in
+            for pageIndex in 0..<renderer.numberOfPages {
+                context.beginPage()
+                renderer.drawPage(at: pageIndex, in: printableRect)
+            }
+        }
+        return data
+    }
+
+    private static func buildMessagePayloads(messages: [ChatExportMessage], formatter: DateFormatter) -> [[String: Any]] {
+        return messages.map { message in
             let roleLabel: String
             switch message.role {
             case ChatRole.user:
@@ -68,104 +114,235 @@ struct PDFExporter {
             default:
                 roleLabel = message.role
             }
-            let timeText = dateFormatter.string(from: message.createdAt)
-            let header = "\n\(roleLabel)  ·  \(timeText)"
-            blocks.append(NSAttributedString(string: header, attributes: [
-                .font: metaFont,
-                .foregroundColor: UIColor.secondaryLabel,
-                .paragraphStyle: paragraphStyle
-            ]))
-
+            var payload: [String: Any] = [
+                "role": message.role,
+                "roleLabel": roleLabel,
+                "timeText": formatter.string(from: message.createdAt),
+                "content": message.content
+            ]
             if let reasoning = message.reasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
                !reasoning.isEmpty {
-                blocks.append(NSAttributedString(string: "\n思考：\(reasoning)\n", attributes: [
-                    .font: metaFont,
-                    .foregroundColor: UIColor.secondaryLabel,
-                    .paragraphStyle: paragraphStyle
-                ]))
+                payload["reasoning"] = reasoning
             }
-
-            let content = message.content.trimmingCharacters(in: .whitespacesAndNewlines)
-            let markdown = renderMarkdown(content, font: bodyFont, color: UIColor.label)
-            let wrapped = NSMutableAttributedString(string: "\n")
-            wrapped.append(markdown)
-            wrapped.append(NSAttributedString(string: "\n"))
-            blocks.append(wrapped)
-        }
-
-        let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("PixiaChat-\(session.id.uuidString).pdf")
-
-        do {
-            try renderer.writePDF(to: url, withActions: { context in
-                var y = margin
-                context.beginPage()
-
-                for block in blocks {
-                    let bounding = block.boundingRect(
-                        with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude),
-                        options: [.usesLineFragmentOrigin, .usesFontLeading],
-                        context: nil
-                    )
-
-                    if y + bounding.height > pageRect.height - margin {
-                        context.beginPage()
-                        y = margin
-                    }
-
-                    block.draw(in: CGRect(x: margin, y: y, width: contentWidth, height: bounding.height))
-                    y += bounding.height + 6
-                }
-            })
-            return .success(url)
-        } catch {
-            DebugLogger.log("pdf export error: \(error.localizedDescription)")
-            return .failure(.failed("导出失败"))
+            if let imageData = message.imageData, !imageData.isEmpty {
+                payload["imageData"] = imageData.base64EncodedString()
+                payload["imageMimeType"] = message.imageMimeType ?? "image/jpeg"
+            }
+            return payload
         }
     }
 
-    private static func renderMarkdown(_ text: String, font: UIFont, color: UIColor) -> NSAttributedString {
-        guard !text.isEmpty else { return NSAttributedString(string: "") }
-        if let attributed = try? NSAttributedString(
-            markdown: text,
-            options: .init(interpretedSyntax: .full, failurePolicy: .returnPartiallyParsedIfPossible)
-        ) {
-            let mutable = NSMutableAttributedString(attributedString: attributed)
-            applyBaseAttributes(to: mutable, font: font, color: color)
-            return mutable
-        }
-        return NSAttributedString(string: text, attributes: [
-            .font: font,
-            .foregroundColor: color
-        ])
+    private static func jsonString(from object: Any) -> String {
+        let data = try? JSONSerialization.data(withJSONObject: object, options: [])
+        var json = String(data: data ?? Data("[]".utf8), encoding: .utf8) ?? "[]"
+        json = json.replacingOccurrences(of: "</", with: "<\\/")
+        return json
     }
 
-    private static func applyBaseAttributes(to attributed: NSMutableAttributedString, font: UIFont, color: UIColor) {
-        let fullRange = NSRange(location: 0, length: attributed.length)
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineBreakMode = .byWordWrapping
-        attributed.addAttribute(.paragraphStyle, value: paragraphStyle, range: fullRange)
-        attributed.addAttribute(.foregroundColor, value: color, range: fullRange)
+    private static func htmlTemplate(title: String, createdAt: String, messagesJSON: String) -> String {
+        let katexCSS = loadResource(name: "katex.min", ext: "css")
+        let markdownIt = loadResource(name: "markdown-it.min", ext: "js")
+        let texmath = loadResource(name: "texmath.min", ext: "js")
+        let katexJS = loadResource(name: "katex.min", ext: "js")
 
-        let scale = font.pointSize / UIFont.systemFontSize
-        attributed.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
-            guard let current = value as? UIFont else {
-                attributed.addAttribute(.font, value: font, range: range)
-                return
+        return """
+        <!doctype html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <style>
+            \(katexCSS)
+            body {
+              margin: 0;
+              padding: 0;
+              font: -apple-system-body;
+              color: #1C1C1E;
+              background: white;
             }
-            let targetSize = max(8, current.pointSize * scale)
-            let traits = current.fontDescriptor.symbolicTraits
-            if traits.contains(.traitMonoSpace) {
-                let weight: UIFont.Weight = traits.contains(.traitBold) ? .bold : .regular
-                let mono = UIFont.monospacedSystemFont(ofSize: targetSize, weight: weight)
-                attributed.addAttribute(.font, value: mono, range: range)
-                return
+            .title {
+              font-size: 20px;
+              font-weight: 600;
+              margin-bottom: 2px;
             }
-            if let descriptor = font.fontDescriptor.withSymbolicTraits(traits) {
-                attributed.addAttribute(.font, value: UIFont(descriptor: descriptor, size: targetSize), range: range)
-            } else {
-                attributed.addAttribute(.font, value: font, range: range)
+            .meta {
+              font-size: 10px;
+              color: #6C6C70;
+              margin-bottom: 12px;
+            }
+            .message {
+              margin: 10px 0 14px;
+              padding-bottom: 8px;
+              border-bottom: 1px solid rgba(0,0,0,0.08);
+            }
+            .message:last-child {
+              border-bottom: none;
+            }
+            .message-meta {
+              font-size: 10px;
+              color: #6C6C70;
+              margin-bottom: 6px;
+            }
+            .reasoning {
+              font-size: 11px;
+              color: #6C6C70;
+              background: #F2F2F7;
+              padding: 6px 8px;
+              border-radius: 8px;
+              margin-bottom: 6px;
+            }
+            .reasoning-title {
+              font-size: 10px;
+              margin-bottom: 2px;
+            }
+            .attachment {
+              max-width: 100%;
+              height: auto;
+              border-radius: 10px;
+              margin-bottom: 6px;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              margin: 0.4em 0 0.2em;
+            }
+            p, ul, ol {
+              margin: 0.2em 0 0.5em;
+            }
+            code {
+              font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+              font-size: 0.92em;
+              background: #F2F2F7;
+              padding: 0.12em 0.28em;
+              border-radius: 6px;
+            }
+            pre {
+              background: #F2F2F7;
+              padding: 0.6em 0.8em;
+              border-radius: 10px;
+              overflow-x: auto;
+            }
+            pre code {
+              background: transparent;
+              padding: 0;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 0.4em 0;
+              font-size: 0.95em;
+            }
+            th, td {
+              border: 1px solid rgba(0,0,0,0.08);
+              padding: 6px 8px;
+              text-align: left;
+            }
+            a { color: #2B7CFF; }
+          </style>
+        </head>
+        <body>
+          <div class="title">\(escapeHTML(title))</div>
+          <div class="meta">创建时间：\(escapeHTML(createdAt))</div>
+          <div id="content"></div>
+          <script>\(katexJS)</script>
+          <script>\(markdownIt)</script>
+          <script>\(texmath)</script>
+          <script>
+            const messages = \(messagesJSON);
+            const md = window.markdownit({
+              html: false,
+              linkify: true,
+              breaks: true
+            }).use(texmath, { engine: katex, delimiters: ['dollars', 'brackets', 'beg_end', 'gitlab'] });
+
+            function preprocessMath(text) {
+              if (!text || text.indexOf("\\\\[") === -1) {
+                return text;
+              }
+              const parts = text.split("```");
+              for (let i = 0; i < parts.length; i += 2) {
+                parts[i] = parts[i].replace(/\\\\\\[([\\s\\S]+?)\\\\\\]/g, function(_, inner) {
+                  return "$$" + inner + "$$";
+                });
+              }
+              return parts.join("```");
+            }
+
+            function renderMessage(msg) {
+              let html = '<div class="message">';
+              html += '<div class="message-meta">' + msg.roleLabel + ' · ' + msg.timeText + '</div>';
+              if (msg.reasoning) {
+                html += '<div class="reasoning">';
+                html += '<div class="reasoning-title">思考</div>';
+                html += '<div class="reasoning-body">' + md.render(preprocessMath(msg.reasoning)) + '</div>';
+                html += '</div>';
+              }
+              if (msg.imageData) {
+                const mime = msg.imageMimeType || 'image/jpeg';
+                html += '<img class="attachment" src="data:' + mime + ';base64,' + msg.imageData + '" />';
+              }
+              html += '<div class="body">' + md.render(preprocessMath(msg.content || "")) + '</div>';
+              html += '</div>';
+              return html;
+            }
+
+            function renderAll() {
+              const container = document.getElementById('content');
+              container.innerHTML = messages.map(renderMessage).join('');
+              if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ready) {
+                window.webkit.messageHandlers.ready.postMessage('ready');
+              }
+            }
+            window.addEventListener('load', renderAll);
+          </script>
+        </body>
+        </html>
+        """
+    }
+
+    private static func escapeHTML(_ text: String) -> String {
+        return text
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "'", with: "&#39;")
+    }
+
+    private static func loadResource(name: String, ext: String) -> String {
+        let subdirs = ["Resources/markdown", "markdown", nil]
+        for subdir in subdirs {
+            let url = Bundle.main.url(forResource: name, withExtension: ext, subdirectory: subdir)
+            if let url, let data = try? Data(contentsOf: url), let text = String(data: data, encoding: .utf8) {
+                return text
             }
         }
+        return ""
+    }
+}
+
+private final class PDFWebViewCoordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+    private var continuation: CheckedContinuation<Bool, Never>?
+    private var isReady = false
+
+    func waitReady() async -> Bool {
+        if isReady { return true }
+        return await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "ready" else { return }
+        isReady = true
+        continuation?.resume(returning: true)
+        continuation = nil
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        continuation?.resume(returning: false)
+        continuation = nil
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        continuation?.resume(returning: false)
+        continuation = nil
     }
 }

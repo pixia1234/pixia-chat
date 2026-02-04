@@ -354,18 +354,24 @@ struct ChatView: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         let sessionSnapshot = ChatExportSession(id: session.id, title: session.title, createdAt: session.createdAt)
         let messageSnapshots = messages.map { message in
-            ChatExportMessage(role: message.role, content: message.content, reasoning: message.reasoning, createdAt: message.createdAt)
+            let imageData = message.imageData ?? ChatImageStore.shared.loadImage(id: message.id)
+            return ChatExportMessage(
+                role: message.role,
+                content: message.content,
+                reasoning: message.reasoning,
+                createdAt: message.createdAt,
+                imageData: imageData,
+                imageMimeType: message.imageMimeType
+            )
         }
-        Task.detached(priority: .userInitiated) {
-            let result = PDFExporter.export(session: sessionSnapshot, messages: messageSnapshots)
-            await MainActor.run {
-                switch result {
-                case .success(let url):
-                    sharePayload = SharePayload(items: [url])
-                    Haptics.light()
-                case .failure(let error):
-                    viewModel.errorMessage = error.message
-                }
+        Task {
+            let result = await PDFExporter.export(session: sessionSnapshot, messages: messageSnapshots)
+            switch result {
+            case .success(let url):
+                sharePayload = SharePayload(items: [url])
+                Haptics.light()
+            case .failure(let error):
+                viewModel.errorMessage = error.message
             }
         }
     }
