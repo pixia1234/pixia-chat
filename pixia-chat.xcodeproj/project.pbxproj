@@ -352,6 +352,8 @@
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
 					INFOPLIST_FILE = "pixia-chat/Info.plist";
+					INFOPLIST_KEY_UIApplicationSupportsMultipleScenes = YES;
+					INFOPLIST_KEY_UIRequiresFullScreen = NO;
 					IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 					MARKETING_VERSION = 1.0.1;
@@ -376,6 +378,8 @@
 					DEVELOPMENT_TEAM = "";
 					GENERATE_INFOPLIST_FILE = NO;
 					INFOPLIST_FILE = "pixia-chat/Info.plist";
+					INFOPLIST_KEY_UIApplicationSupportsMultipleScenes = YES;
+					INFOPLIST_KEY_UIRequiresFullScreen = NO;
 					IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 					MARKETING_VERSION = 1.0.1;
