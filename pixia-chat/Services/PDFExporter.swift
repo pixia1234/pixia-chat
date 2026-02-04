@@ -86,10 +86,11 @@ struct PDFExporter {
             }
 
             let content = message.content.trimmingCharacters(in: .whitespacesAndNewlines)
-            blocks.append(NSAttributedString(string: "\n\(content)\n", attributes: [
-                .font: bodyFont,
-                .paragraphStyle: paragraphStyle
-            ]))
+            let markdown = renderMarkdown(content, font: bodyFont, color: UIColor.label)
+            let wrapped = NSMutableAttributedString(string: "\n")
+            wrapped.append(markdown)
+            wrapped.append(NSAttributedString(string: "\n"))
+            blocks.append(wrapped)
         }
 
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
@@ -120,6 +121,51 @@ struct PDFExporter {
         } catch {
             DebugLogger.log("pdf export error: \(error.localizedDescription)")
             return .failure(.failed("导出失败"))
+        }
+    }
+
+    private static func renderMarkdown(_ text: String, font: UIFont, color: UIColor) -> NSAttributedString {
+        guard !text.isEmpty else { return NSAttributedString(string: "") }
+        if let attributed = try? NSAttributedString(
+            markdown: text,
+            options: .init(interpretedSyntax: .full, failurePolicy: .returnPartiallyParsedIfPossible)
+        ) {
+            let mutable = NSMutableAttributedString(attributedString: attributed)
+            applyBaseAttributes(to: mutable, font: font, color: color)
+            return mutable
+        }
+        return NSAttributedString(string: text, attributes: [
+            .font: font,
+            .foregroundColor: color
+        ])
+    }
+
+    private static func applyBaseAttributes(to attributed: NSMutableAttributedString, font: UIFont, color: UIColor) {
+        let fullRange = NSRange(location: 0, length: attributed.length)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = .byWordWrapping
+        attributed.addAttribute(.paragraphStyle, value: paragraphStyle, range: fullRange)
+        attributed.addAttribute(.foregroundColor, value: color, range: fullRange)
+
+        let scale = font.pointSize / UIFont.systemFontSize
+        attributed.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
+            guard let current = value as? UIFont else {
+                attributed.addAttribute(.font, value: font, range: range)
+                return
+            }
+            let targetSize = max(8, current.pointSize * scale)
+            let traits = current.fontDescriptor.symbolicTraits
+            if traits.contains(.traitMonoSpace) {
+                let weight: UIFont.Weight = traits.contains(.traitBold) ? .bold : .regular
+                let mono = UIFont.monospacedSystemFont(ofSize: targetSize, weight: weight)
+                attributed.addAttribute(.font, value: mono, range: range)
+                return
+            }
+            if let descriptor = font.fontDescriptor.withSymbolicTraits(traits) {
+                attributed.addAttribute(.font, value: UIFont(descriptor: descriptor, size: targetSize), range: range)
+            } else {
+                attributed.addAttribute(.font, value: font, range: range)
+            }
         }
     }
 }
