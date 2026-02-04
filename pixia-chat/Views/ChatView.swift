@@ -23,7 +23,7 @@ struct ChatView: View {
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
-    private var inputMinHeight: CGFloat { isPad ? 24 : 32 }
+    private var inputMinHeight: CGFloat { isPad ? 28 : 32 }
     private var inputMaxHeight: CGFloat { isPad ? 56 : 120 }
 
     init(session: ChatSession, context: NSManagedObjectContext, settings: SettingsStore) {

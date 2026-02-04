@@ -302,11 +302,6 @@ final class OpenAIResponsesClient: LLMClient {
     }
 
     private static func normalizeImageURL(_ value: String) -> String {
-        guard value.hasPrefix("data:"),
-              let commaIndex = value.firstIndex(of: ",") else {
-            return value
-        }
-        let base64 = String(value[value.index(after: commaIndex)...])
-        return base64.isEmpty ? value : base64
+        return value
     }
 }
