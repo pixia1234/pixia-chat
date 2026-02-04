@@ -45,17 +45,8 @@ struct ChatSplitView: View {
                 .navigationViewStyle(DoubleColumnNavigationViewStyle())
             }
         }
-        .alert("重命名", isPresented: $showRename) {
-            TextField("对话标题", text: $renameText)
-            Button("取消", role: .cancel) {}
-            Button("保存") {
-                if let session = renamingSession {
-                    viewModel.renameSession(session, title: renameText)
-                    Haptics.light()
-                }
-            }
-        } message: {
-            Text("给这条对话起个新名字")
+        .sheet(isPresented: $showRename) {
+            renameSheet
         }
         .onAppear {
             if selectedSessionID == nil, let first = filteredSessions.first {
@@ -253,5 +244,37 @@ struct ChatSplitView: View {
             }
         }
         return false
+    }
+
+    private var renameSheet: some View {
+        NavigationView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("给这条对话起个新名字")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                TextField("对话标题", text: $renameText)
+                    .textFieldStyle(.roundedBorder)
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("重命名")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("取消") {
+                        showRename = false
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("保存") {
+                        if let session = renamingSession {
+                            viewModel.renameSession(session, title: renameText)
+                            Haptics.light()
+                        }
+                        showRename = false
+                    }
+                }
+            }
+        }
     }
 }
