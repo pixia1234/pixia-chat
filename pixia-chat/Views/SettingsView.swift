@@ -4,6 +4,7 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     private let iconWidth: CGFloat = 20
     private let iconSpacing: CGFloat = 10
+    @State private var debugStatus: String?
 
     var body: some View {
         Form {
@@ -114,14 +115,21 @@ struct SettingsView: View {
                 Button("复制日志") {
                     DebugLogger.copyToPasteboard()
                     Haptics.light()
+                    showDebugStatus("已复制到剪贴板")
                 }
                 Button("清空日志") {
                     DebugLogger.clear()
                     Haptics.light()
+                    showDebugStatus("日志已清空")
                 }
                 Text("日志文件：Documents/pixia-debug.log")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                if let debugStatus {
+                    Text(debugStatus)
+                        .font(.footnote)
+                        .foregroundColor(.green)
+                }
             }
         }
         .navigationTitle("设置")
@@ -147,5 +155,14 @@ struct SettingsView: View {
         Image(systemName: name)
             .foregroundColor(color)
             .frame(width: iconWidth, alignment: .center)
+    }
+
+    private func showDebugStatus(_ text: String) {
+        debugStatus = text
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            if debugStatus == text {
+                debugStatus = nil
+            }
+        }
     }
 }
