@@ -295,6 +295,17 @@ struct ChatView: View {
 
     private func messageContextMenu(_ message: Message) -> some View {
         Group {
+            Button("复制") {
+                let copied: String
+                if let reasoning = message.reasoning?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !reasoning.isEmpty {
+                    copied = "思考：\n\(reasoning)\n\n内容：\n\(message.content)"
+                } else {
+                    copied = message.content
+                }
+                UIPasteboard.general.string = copied
+                Haptics.light()
+            }
             if message.role != ChatRole.system {
                 Button("编辑") {
                     startEdit(message)
