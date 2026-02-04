@@ -7,13 +7,14 @@ struct ChatBubbleView: View {
     var reasoning: String? = nil
     var imageData: Data? = nil
     var isDraft: Bool = false
+    var contextMenuContent: (() -> AnyView)? = nil
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if !isRightAligned {
                 avatarView
             }
-            bubbleView
+            bubbleViewWithMenu
             if isRightAligned {
                 avatarView
             }
@@ -132,6 +133,18 @@ struct ChatBubbleView: View {
         )
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .frame(maxWidth: 520, alignment: isRightAligned ? .trailing : .leading)
+    }
+
+    private var bubbleViewWithMenu: some View {
+        Group {
+            if let contextMenuContent {
+                bubbleView.contextMenu {
+                    contextMenuContent()
+                }
+            } else {
+                bubbleView
+            }
+        }
     }
 
     private var bubbleColor: Color {

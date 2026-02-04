@@ -45,11 +45,14 @@ struct ChatView: View {
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
                                 ForEach(messages, id: \.objectID) { message in
-                                    ChatBubbleView(role: message.role, text: message.content, reasoning: message.reasoning, imageData: message.imageData)
-                                        .id(message.objectID)
-                                        .contextMenu {
-                                            messageContextMenu(message)
-                                        }
+                                    ChatBubbleView(
+                                        role: message.role,
+                                        text: message.content,
+                                        reasoning: message.reasoning,
+                                        imageData: message.imageData,
+                                        contextMenuContent: { AnyView(messageContextMenu(message)) }
+                                    )
+                                    .id(message.objectID)
                                 }
                                 if !viewModel.assistantDraft.isEmpty || !viewModel.assistantReasoningDraft.isEmpty {
                                     ChatBubbleView(role: ChatRole.assistant, text: viewModel.assistantDraft, reasoning: viewModel.assistantReasoningDraft, isDraft: true)
